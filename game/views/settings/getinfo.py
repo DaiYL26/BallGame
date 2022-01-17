@@ -4,13 +4,19 @@ from game.models.player.player import Player
 
 def get_user_info_acapp(request):
     
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'state': 'not login'
-        })
+    # if not request.user.is_authenticated:
+    #     return JsonResponse({
+    #         'state': 'not login'
+    #     })
     
-    user = Player.objects.all()[0]
+    user = Player.objects.get(user=request.user)
+    if not user:
+        return JsonResponse({
+            'result' : 'falied'
+        })
+
     return JsonResponse({
+        'result': 'success',
         'username': user.user.username,
         'photo': user.photo
     })
@@ -20,12 +26,18 @@ def get_user_info_web(request):
     
     if not request.user.is_authenticated:
         return JsonResponse({
-            'state': 'not login'
+            'result': 'not login'
         })
-    
-    user = Player.objects.all()[0]
+        
+    user = Player.objects.get(user=request.user)
+
+    if not user:
+        return JsonResponse({
+            'result' : 'falied'
+        })
+
     return JsonResponse({
-        'state': 'success',
+        'result': 'success',
         'username': user.user.username,
         'photo': user.photo
     })

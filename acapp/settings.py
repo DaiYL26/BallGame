@@ -27,6 +27,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["120.77.222.189", "localhost", "app122.acapp.acwing.com.cn"]
 
+CACHES = { 
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://120.77.222.189:63799/1',
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "moonlight",
+        },  
+    },  
+}
+USER_AGENTS_CACHE = 'default'
 
 # Application definition
 

@@ -30,6 +30,7 @@ class AcGameMenu {
 
     start() {
         this.add_listening_events()
+        this.hide()
     }
 
     add_listening_events() {
