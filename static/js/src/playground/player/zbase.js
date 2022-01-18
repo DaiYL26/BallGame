@@ -17,7 +17,7 @@ class Player extends AcGameObject {
         this.color = color
         this.speed = speed
         this.is_me = is_me
-        this.eps = 0.1
+        this.eps = 0.01
 
         this.cur_skill = null
 
@@ -29,18 +29,18 @@ class Player extends AcGameObject {
 
     start() {
         //this.render()
+        let scale = this.playground.scale
         if (this.is_me) {
             this.add_listening_events()
         } else {
-            let x = Math.random() * this.playground.width
-            let y = Math.random() * this.playground.height
+            let x = Math.random() * this.playground.width / scale
+            let y = Math.random() * this.playground.height / scale
             this.move_to(x, y)
         }
     }
 
     add_listening_events() {
         let outer = this
-
         // canvas 内禁止鼠标右键
         this.playground.game_map.$canvas.on('contextmenu', function () {
             return false
@@ -52,12 +52,11 @@ class Player extends AcGameObject {
             // 移动
             if (e.which  === 3) {
                 // console.log('move');
-                outer.move_to(e.clientX - binding_rect.left, e.clientY - binding_rect.top)
+                outer.move_to( (e.clientX - binding_rect.left) / outer.playground.scale, (e.clientY - binding_rect.top) / outer.playground.scale )
             } else if (e.which == 1) {  //发技能
                 if (outer.cur_skill === 'fireball' && outer.spent_time > 4) {
-                    outer.shoot_fireball(e.clientX - binding_rect.left, e.clientY - binding_rect.top)
+                    outer.shoot_fireball( (e.clientX - binding_rect.left) / outer.playground.scale, (e.clientY - binding_rect.top) / outer.playground.scale )
                 }
-                
                 outer.cur_skill = null
             }
         })
@@ -80,15 +79,15 @@ class Player extends AcGameObject {
     // 发射火球
     shoot_fireball(tx, ty) {
         let x = this.x, y = this.y
-        let radius = this.playground.height * 0.01
+        let radius = 0.01
         let angle = Math.atan2(ty - y, tx - x) //获取角度，正交坐标中的角度
         let vx = Math.cos(angle)    // x方向上的单位速度
         let vy = Math.sin(angle)    // y方向上的单位速度
         let color = 'orange'        // 火球颜色
-        let speed = this.playground.height * 0.5    // 火球速度
-        let move_length = this.playground.height * 1    //火球的发射距离
+        let speed =  0.5    // 火球速度
+        let move_length = 1    //火球的发射距离
         // 发射火球
-        new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, this.playground.height * 0.01)
+        new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, this.playground.height * 0.01 / this.playground.scale)
     }
 
     // 玩家消失时
@@ -107,8 +106,13 @@ class Player extends AcGameObject {
 
     // 渲染操作
     update() {
-        // console.log('Player update')
+        this.update_move()    
+        this.render()
+    }
+
+    update_move() {
         this.spent_time += this.timedelta / 1000;
+        let scale = this.playground.scale
 
         // 控制电脑玩家发射火球
         if (!this.is_me && this.spent_time > 3 && Math.random() < 1 / (20 * this.playground.players.length)) {
@@ -123,7 +127,7 @@ class Player extends AcGameObject {
         }
 
         // 受到伤害后退的速度
-        if (this.damage_speed > 10) {
+        if (this.damage_speed > this.eps) {
             // 清空当前的移动状态
             this.vx = this.vy = 0
             this.move_length = 0
@@ -131,10 +135,10 @@ class Player extends AcGameObject {
             let mx = this.damage_x * this.damage_speed * this.timedelta / 1000
             let my = this.damage_y * this.damage_speed * this.timedelta / 1000
             //越界判断，不能被弹出界
-            if (this.x + mx > this.radius && this.x + mx + this.radius < this.playground.width) {
+            if (this.x + mx > this.radius && this.x + mx + this.radius < this.playground.width / scale) {
                 this.x += mx 
             }
-            if (this.y + my > this.radius && this.y + my + this.radius < this.playground.height) {
+            if (this.y + my > this.radius && this.y + my + this.radius < this.playground.height / scale) {
                 this.y += my
             }
             this.damage_speed *= this.friction
@@ -144,8 +148,8 @@ class Player extends AcGameObject {
                 this.move_length = 0
                 this.vx = this.vy = 0
                 if (this.is_me === false) {
-                    let x = Math.random() * this.playground.width
-                    let y = Math.random() * this.playground.height
+                    let x = Math.random() * this.playground.width / scale
+                    let y = Math.random() * this.playground.height / scale
                     this.move_to(x, y)
                 }
             } else {
@@ -153,18 +157,16 @@ class Player extends AcGameObject {
                 //越界判断，不能出界
                 // this.x + this.vx * moved > this.radius （保证不出上届）
                 // this.x + this.vx * moved + this.radius < this.playground.width （不出下届）
-                if (this.x + this.vx * moved > this.radius && this.x + this.vx * moved + this.radius < this.playground.width) {
+                if (this.x + this.vx * moved > this.radius && this.x + this.vx * moved + this.radius < this.playground.width / scale) {
                     this.x += this.vx * moved
                 }
-                if (this.y + this.vy * moved > this.radius && this.y + this.vy * moved + this.radius < this.playground.height) {
+                if (this.y + this.vy * moved > this.radius && this.y + this.vy * moved + this.radius < this.playground.height / scale) {
                     this.y += this.vy * moved
                 }
                 // 更新剩余移动距离
                 this.move_length -= moved
             }
         }
-
-        this.render()
     }
 
     // 被攻击触发
@@ -187,7 +189,7 @@ class Player extends AcGameObject {
         // 缩小半径
         this.radius -= damage
         // 半径小于10时，判定死亡
-        if (this.radius < 10) {
+        if (this.radius < this.eps) {
             this.destroy()
             return false
         }
@@ -214,20 +216,21 @@ class Player extends AcGameObject {
     }
 
     render() {
+        let scale = this.playground.scale
         if (this.is_me) {
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
             this.ctx.stroke();
             this.ctx.clip();
-            this.ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2); 
+            this.ctx.drawImage(this.img, (this.x - this.radius) * scale, (this.y - this.radius) * scale, this.radius * 2 * scale, this.radius * 2 * scale);
             this.ctx.restore();
             
             return
         }
 
         this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
         
