@@ -71,6 +71,12 @@ class Player extends AcGameObject {
         })
     }
 
+    unbind_listening_events() {
+        this.cur_skill = null
+        $(window).unbind('keydown')
+        this.playground.game_map.$canvas.unbind('mousedown')
+    }
+
     // 发射火球
     shoot_fireball(tx, ty) {
         let x = this.x, y = this.y
@@ -91,6 +97,10 @@ class Player extends AcGameObject {
             let player = this.playground.players[i]
             if (player === this) {
                 this.playground.players.splice(i, 1)
+                if (player.is_me) {
+                    console.log('unbinding ...');
+                    this.unbind_listening_events()
+                }
             }
         }
     }

@@ -16,6 +16,9 @@ class AcGameMenu {
                 <div class="ac-game-menu-field-item ac-game-menu-field-item-settings">
                     设置
                 </div>
+                <div class="ac-game-menu-field-item ac-game-menu-field-item-logout">
+                    退出
+                </div>
             </div>
         </div>
         `)
@@ -24,6 +27,7 @@ class AcGameMenu {
         this.$single_mode = this.$menu.find('.ac-game-menu-field-item-single-mode')
         this.$multi_mode = this.$menu.find('.ac-game-menu-field-item-multi-mode')
         this.$settings = this.$menu.find('.ac-game-menu-field-item-settings')
+        this.$logout = this.$menu.find('.ac-game-menu-field-item-logout')
 
         this.start()
     }
@@ -45,6 +49,13 @@ class AcGameMenu {
         })
         this.$settings.click(function () {
             console.log("click settings")
+        })
+        this.$logout.click(function () {
+            $.get('https://app122.acapp.acwing.com.cn/settings/logout/').then(res => {
+                if (res.result === 'success') {
+                    $(location).attr('href', '/')
+                }
+            })
         })
     }
 

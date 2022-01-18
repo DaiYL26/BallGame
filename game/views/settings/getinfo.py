@@ -4,11 +4,11 @@ from game.models.player.player import Player
 
 def get_user_info_acapp(request):
     
-    # if not request.user.is_authenticated:
-    #     return JsonResponse({
-    #         'state': 'not login'
-    #     })
-    
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'result': 'not login'
+        })
+        
     user = Player.objects.get(user=request.user)
     if not user:
         return JsonResponse({
@@ -30,7 +30,6 @@ def get_user_info_web(request):
         })
         
     user = Player.objects.get(user=request.user)
-
     if not user:
         return JsonResponse({
             'result' : 'falied'
@@ -44,6 +43,7 @@ def get_user_info_web(request):
 
 
 def get_user_info(request):
+    
     platform = request.GET.get('platform')
     if platform == 'ACAPP':
         return get_user_info_acapp(request)

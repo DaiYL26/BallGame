@@ -16,6 +16,9 @@ class AcGameMenu {
                 <div class="ac-game-menu-field-item ac-game-menu-field-item-settings">
                     设置
                 </div>
+                <div class="ac-game-menu-field-item ac-game-menu-field-item-logout">
+                    退出
+                </div>
             </div>
         </div>
         `)
@@ -24,6 +27,7 @@ class AcGameMenu {
         this.$single_mode = this.$menu.find('.ac-game-menu-field-item-single-mode')
         this.$multi_mode = this.$menu.find('.ac-game-menu-field-item-multi-mode')
         this.$settings = this.$menu.find('.ac-game-menu-field-item-settings')
+        this.$logout = this.$menu.find('.ac-game-menu-field-item-logout')
 
         this.start()
     }
@@ -45,6 +49,13 @@ class AcGameMenu {
         })
         this.$settings.click(function () {
             console.log("click settings")
+        })
+        this.$logout.click(function () {
+            $.get('https://app122.acapp.acwing.com.cn/settings/logout/').then(res => {
+                if (res.result === 'success') {
+                    $(location).attr('href', '/')
+                }
+            })
         })
     }
 
@@ -252,6 +263,12 @@ class Particle extends AcGameObject {
         })
     }
 
+    unbind_listening_events() {
+        this.cur_skill = null
+        $(window).unbind('keydown')
+        this.playground.game_map.$canvas.unbind('mousedown')
+    }
+
     // 发射火球
     shoot_fireball(tx, ty) {
         let x = this.x, y = this.y
@@ -272,6 +289,10 @@ class Particle extends AcGameObject {
             let player = this.playground.players[i]
             if (player === this) {
                 this.playground.players.splice(i, 1)
+                if (player.is_me) {
+                    console.log('unbinding ...');
+                    this.unbind_listening_events()
+                }
             }
         }
     }
@@ -632,8 +653,42 @@ class Settings {
     }
 
     start() {
+        if (this.platform == 'ACAPP') {
+            this.getUserInfo_AcApp()
+            return
+        }
         this.add_listening_events();
         this.getUserInfo()
+    }
+
+    acapp_login(appid, redirect_uri, scope, state) {
+        let outer = this;
+        console.log(appid, redirect_uri, scope, state);
+        this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function(resp) {
+            console.log("called from acapp_login function");
+            console.log(resp);
+            if (resp.result === "success") {
+                outer.username = resp.username;
+                outer.photo = resp.photo;
+                outer.hide();
+                outer.root.menu.show();
+            }
+        });
+    }
+
+
+    getUserInfo_AcApp() {
+        let outer = this;
+
+        $.ajax({
+            url: "https://app122.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
+            type: "GET",
+            success: function(resp) {
+                if (resp.result === "success") {
+                    outer.acapp_login(resp.appid, resp.redirect_uri, resp.scope, resp.state);
+                }
+            }
+        });
     }
 
     add_listening_events() {
@@ -689,7 +744,7 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: "/settings/register/",
+            url: "https://app122.acapp.acwing.com.cn/settings/register/",
             type: "POST",
             data: {
                 username: username,
@@ -715,7 +770,7 @@ class Settings {
         this.$login_error_message.empty();
 
         $.ajax({
-            url: "/settings/login",
+            url: "https://app122.acapp.acwing.com.cn/settings/login",
             type: "GET",
             data: {
                 username: username,
@@ -746,7 +801,7 @@ class Settings {
     getUserInfo() {
         let outer = this
         $.ajax({
-            url: '/settings/getUserInfo',
+            url: 'https://app122.acapp.acwing.com.cn/settings/getUserInfo',
             type: 'GET',
             data: {
                 platform: outer.platform

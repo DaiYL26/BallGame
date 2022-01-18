@@ -112,8 +112,42 @@ class Settings {
     }
 
     start() {
+        if (this.platform == 'ACAPP') {
+            this.getUserInfo_AcApp()
+            return
+        }
         this.add_listening_events();
         this.getUserInfo()
+    }
+
+    acapp_login(appid, redirect_uri, scope, state) {
+        let outer = this;
+        console.log(appid, redirect_uri, scope, state);
+        this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function(resp) {
+            console.log("called from acapp_login function");
+            console.log(resp);
+            if (resp.result === "success") {
+                outer.username = resp.username;
+                outer.photo = resp.photo;
+                outer.hide();
+                outer.root.menu.show();
+            }
+        });
+    }
+
+
+    getUserInfo_AcApp() {
+        let outer = this;
+
+        $.ajax({
+            url: "https://app122.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
+            type: "GET",
+            success: function(resp) {
+                if (resp.result === "success") {
+                    outer.acapp_login(resp.appid, resp.redirect_uri, resp.scope, resp.state);
+                }
+            }
+        });
     }
 
     add_listening_events() {
@@ -169,7 +203,7 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: "/settings/register/",
+            url: "https://app122.acapp.acwing.com.cn/settings/register/",
             type: "POST",
             data: {
                 username: username,
@@ -195,7 +229,7 @@ class Settings {
         this.$login_error_message.empty();
 
         $.ajax({
-            url: "/settings/login",
+            url: "https://app122.acapp.acwing.com.cn/settings/login",
             type: "GET",
             data: {
                 username: username,
@@ -226,7 +260,7 @@ class Settings {
     getUserInfo() {
         let outer = this
         $.ajax({
-            url: '/settings/getUserInfo',
+            url: 'https://app122.acapp.acwing.com.cn/settings/getUserInfo',
             type: 'GET',
             data: {
                 platform: outer.platform
