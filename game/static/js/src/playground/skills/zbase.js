@@ -24,32 +24,59 @@ class FireBall extends AcGameObject {
 
     }
 
+    on_destroy() {
+        let fireballs = this.player.fireballs;
+        for (let i = 0; i < fireballs.length; i ++ ) {
+            if (fireballs[i] === this) {
+                fireballs.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+
     update() {
         if (this.move_length < this.eps) {
             this.destroy()
             return false
-        } 
+        }
+        this.update_move()
 
+        if (this.player.role !== 'enemy') {
+            this.update_attack()
+        }
+
+        this.render()
+    }
+
+    update_move() {
         let moved = Math.min(this.move_length, this.speed * this.timedelta / 1000);
         this.x += this.vx * moved;
         this.y += this.vy * moved;
         this.move_length -= moved;
+    }
 
+    update_attack() {
         // 碰撞检测
         for (let i = 0; i < this.playground.players.length; i ++) {
             let player = this.playground.players[i]
             // 不是自己，且碰撞
             if (player !== this.player && this.is_collision(player)) {
                 this.attack(player)
+                break;
             }
         }
-
-        this.render()
     }
 
     // 攻击玩家
     attack(player) {
         let angle = Math.atan2(player.y - this.y, player.x - this.x);
+
+        // 联机模式下
+        if (this.playground.mode === 'multi') {
+            this.playground.multiplayer_socket.send_attack(player.uuid, player.x, player.y, angle, this.damage, this.uuid)
+        }
+
         // 让玩家受伤
         player.is_attacked(angle, this.damage);
         this.destroy();

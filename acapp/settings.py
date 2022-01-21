@@ -39,6 +39,16 @@ CACHES = {
 }
 USER_AGENTS_CACHE = 'default'
 
+ASGI_APPLICATION = 'acapp.asgi.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis://:moonlight@120.77.222.189:63799/1")],
+        },
+    },
+}
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -49,6 +59,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -139,3 +150,5 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ROOM_CAPACITY = 3
