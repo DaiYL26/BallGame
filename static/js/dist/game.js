@@ -428,16 +428,19 @@ class NoticeBoard extends AcGameObject {
             outer.update_skill_direct()
         })
 
-        this.playground.chat_field.$history.mousedown(function (e) {
-            if (outer.playground.state !== 'fighting')
-                return false
+        if (this.playground.mode === 'multi') {
+
+            this.playground.chat_field.$history.mousedown(function (e) {
+                if (outer.playground.state !== 'fighting')
+                    return false
         
-            const binding_rect = outer.ctx.canvas.getBoundingClientRect()
+                const binding_rect = outer.ctx.canvas.getBoundingClientRect()
                 // 移动
-            if (e.which === 3) {
-                outer.update_move_target(e, binding_rect)
-            }
-        })
+                if (e.which === 3) {
+                    outer.update_move_target(e, binding_rect)
+                }
+            })
+        }
 
         // 监听鼠标
         this.playground.game_map.$canvas.mousedown(function (e) {
@@ -448,7 +451,8 @@ class NoticeBoard extends AcGameObject {
             // 移动
             if (e.which  === 3) {
                 outer.update_move_target(e, binding_rect)
-                outer.playground.chat_field.hide_input()
+                // if ()
+                // outer.playground.chat_field.hide_input()
             } else if (e.which == 1) {  //发技能
                 let tx = (e.clientX - binding_rect.left) / outer.playground.scale
                 let ty = (e.clientY - binding_rect.top) / outer.playground.scale
@@ -467,7 +471,7 @@ class NoticeBoard extends AcGameObject {
 
         // 监听按键 
         this.playground.game_map.$canvas.keydown(function (e) {
-            console.log(e.which, outer.playground.mode, outer.playground.chat_field);
+
             if (outer.playground.mode === 'multi') {
                 if (e.which === 13) { // enter
                     outer.playground.chat_field.show_input()
@@ -501,7 +505,11 @@ class NoticeBoard extends AcGameObject {
                 }
                 outer.cur_skill = 'blink'
                 outer.blink_coldtime = 5
-                outer.playground.multiplayer_socket.send_blink(outer.x ,outer.y, outer.direct_x, outer.direct_y)
+
+                if (outer.playground.mode === 'multi') {
+                    outer.playground.multiplayer_socket.send_blink(outer.x, outer.y, outer.direct_x, outer.direct_y)
+                }
+
                 outer.blink(outer.x, outer.y, outer.direct_x, outer.direct_y)
                 outer.cur_skill = null
             }
@@ -513,7 +521,9 @@ class NoticeBoard extends AcGameObject {
         this.playground.game_map.$canvas.unbind('keydown')
         this.playground.game_map.$canvas.unbind('mousedown')
         this.playground.game_map.$canvas.unbind('mousemove')
-        this.playground.chat_field.$history.unbind('mousedown')
+        if (this.playground.mode === 'multi') {
+            this.playground.chat_field.$history.unbind('mousedown')
+        }
     }
 
     // 更新移动目的地
