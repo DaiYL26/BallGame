@@ -1016,12 +1016,12 @@ class NoticeBoard extends AcGameObject {
             let data = JSON.parse(e.data)
             let uuid = data.uuid
 
-            console.log(data);
             if (uuid === outer.uuid)
                 return false
             
             let event = data.event
             if (event === 'create_player') {
+                console.log(data);
                 outer.receive_create_player(uuid, data.username, data.photo)
             } else if (event === 'move_to') {
                 outer.receive_move_to(uuid, data.tx, data.ty)
