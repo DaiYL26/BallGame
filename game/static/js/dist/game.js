@@ -97,6 +97,10 @@ class AcGameObject {
     update() {  // 每一帧均会执行一次
     }
 
+    last_update() { // 最后一帧执行一次
+
+    }
+
     on_destroy() {  // 在被销毁前执行一次
     }
 
@@ -113,8 +117,8 @@ class AcGameObject {
 }
 
 let last_timestamp;
-let AC_GAME_ANIMATION = function(timestamp) {
-    for (let i = 0; i < AC_GAME_OBJECTS.length; i ++ ) {
+let AC_GAME_ANIMATION = function (timestamp) {
+    for (let i = 0; i < AC_GAME_OBJECTS.length; i++) {
         let obj = AC_GAME_OBJECTS[i];
         if (!obj.has_called_start) {
             obj.start();
@@ -125,6 +129,11 @@ let AC_GAME_ANIMATION = function(timestamp) {
         }
     }
     last_timestamp = timestamp;
+
+    for (let i = 0; i < AC_GAME_OBJECTS.length; i++) {
+        let obj = AC_GAME_OBJECTS[i];
+        obj.last_update()
+    }
 
     requestAnimationFrame(AC_GAME_ANIMATION);
 }
@@ -411,9 +420,9 @@ class NoticeBoard extends AcGameObject {
     add_listening_events() {
         let outer = this
         // canvas 内禁止鼠标右键
-        this.playground.game_map.$canvas.on('contextmenu', function () {
-            return false
-        })
+        // this.playground.game_map.$canvas.on('contextmenu', function () {
+        //     return false
+        // })
 
         //鼠标移动事件
         this.playground.game_map.$canvas.mousemove(function (e) {
@@ -421,8 +430,8 @@ class NoticeBoard extends AcGameObject {
                 return false
 
             const binding_rect = outer.ctx.canvas.getBoundingClientRect()
-            let tx = (e.clientX - binding_rect.left) / outer.playground.scale
-            let ty = (e.clientY - binding_rect.top) / outer.playground.scale
+            let tx = (e.clientX * window.devicePixelRatio - binding_rect.left) / outer.playground.scale
+            let ty = (e.clientY * window.devicePixelRatio - binding_rect.top) / outer.playground.scale
             outer.mouse_position_x = tx
             outer.mouse_position_y = ty
             outer.update_skill_direct()
@@ -454,15 +463,15 @@ class NoticeBoard extends AcGameObject {
                 // if ()
                 // outer.playground.chat_field.hide_input()
             } else if (e.which == 1) {  //发技能
-                let tx = (e.clientX - binding_rect.left) / outer.playground.scale
-                let ty = (e.clientY - binding_rect.top) / outer.playground.scale
+                let tx = (e.clientX * window.devicePixelRatio - binding_rect.left) / outer.playground.scale
+                let ty = (e.clientY * window.devicePixelRatio - binding_rect.top) / outer.playground.scale
                 if (outer.cur_skill === 'fireball') {
                     
                     let fireball = outer.shoot_fireball( tx, ty )
                     if (outer.playground.mode === 'multi') {
                         outer.playground.multiplayer_socket.send_shoot_fireball(tx, ty, fireball.uuid)
                     }
-                    outer.fireball_coldtime = 3
+                    outer.fireball_coldtime = 1
                 }
                 
                 outer.cur_skill = null
@@ -528,8 +537,10 @@ class NoticeBoard extends AcGameObject {
 
     // 更新移动目的地
     update_move_target(e, binding_rect) {
-        let tx = (e.clientX - binding_rect.left) / this.playground.scale
-        let ty = (e.clientY - binding_rect.top) / this.playground.scale
+        let tx = (e.clientX * window.devicePixelRatio - binding_rect.left ) / this.playground.scale 
+        let ty = (e.clientY * window.devicePixelRatio - binding_rect.top ) / this.playground.scale
+        console.log(e.clientX, binding_rect.left, this.playground.scale);
+        console.log(e.clientY, binding_rect.top, this.playground.scale);
 
         if (this.playground.mode === 'multi') {
             console.log('send move to');
@@ -614,8 +625,15 @@ class NoticeBoard extends AcGameObject {
                 if (player.role === 'self') {
                     console.log('unbinding ...');
                     this.unbind_listening_events()
+                    if (this.playground.state === 'fighting') {
+                        this.playground.score_board.lose()
+                    }
                 }
             }
+        }
+
+        if (this.playground.state === 'fighting' && this.playground.players.length === 1 && this.playground.players[0].role === 'self') {
+            this.playground.score_board.win()
         }
     }
     
@@ -879,6 +897,70 @@ class NoticeBoard extends AcGameObject {
             this.render_blink_icon()
         }
     }
+}class ScoreBoard extends AcGameObject{
+    constructor(playground) {
+        super()
+        this.playground = playground
+        this.ctx = this.playground.game_map.ctx
+
+        this.state = null
+    }
+
+    start() {
+        console.log('score board start');
+    }
+
+    win() {
+        if (this.state) {
+        return
+        }
+        this.state = "win";
+        let outer = this;
+        setTimeout(function() {
+            outer.add_listening_events();
+        }, 1000);
+    }
+
+    lose() {
+        if (this.state) {
+            return
+        }
+        this.state = "lose";
+        let outer = this;
+        setTimeout(function() {
+            outer.add_listening_events();
+        }, 1000);
+    }
+
+    add_listening_events() {
+        let outer = this;
+        let $canvas = this.playground.game_map.$canvas;
+
+        $canvas.on('click', function() {
+            outer.playground.hide();
+            outer.playground.root.menu.show();
+        });
+    }
+
+    render() {
+        let len = this.playground.height;
+        this.ctx.fillStyle = 'white'
+        this.ctx.font = `${len * 0.2}px serif`;
+        this.ctx.textAlign = 'center'
+        if (this.state === "win") {
+            this.ctx.fillText("You Win !", this.playground.width / 2 , this.playground.height / 2 );
+            this.ctx.font = `${len * 0.05}px serif`;
+            this.ctx.fillText("click any position to quit.", this.playground.width / 2, this.playground.height / 2 + len * 0.1);
+        } else if (this.state === "lose") {
+            this.ctx.fillText("You Lose !", this.playground.width / 2, this.playground.height / 2);
+            this.ctx.font = `${len * 0.05}px serif`;
+            this.ctx.fillText("click any position to quit.", this.playground.width / 2, this.playground.height / 2 + len * 0.1);
+        }
+    }
+
+    last_update() {
+        this.render()
+    }
 }class FireBall extends AcGameObject {
 
     constructor(playground, player, x, y, radius, vx, vy, color, speed, move_length, damage) {
@@ -955,7 +1037,7 @@ class NoticeBoard extends AcGameObject {
 
         // 联机模式下
         if (this.playground.mode === 'multi') {
-            this.playground.multiplayer_socket.send_attack(player.uuid, player.x, player.y, angle, this.damage, this.uuid)
+            this.playground.multiplayer_socket.send_attack(player.uuid, player.x, player.y, angle, this.damage, this.uuid, 'fireball')
         }
 
         // 让玩家受伤
@@ -1086,7 +1168,7 @@ class NoticeBoard extends AcGameObject {
         }
     }
 
-    send_attack(attackee_uuid, x, y, angle, damage, ball_uuid) {
+    send_attack(attackee_uuid, x, y, angle, damage, ball_uuid, type) {
         let outer = this
         this.ws.send(JSON.stringify({
             'event': 'attack',
@@ -1096,7 +1178,8 @@ class NoticeBoard extends AcGameObject {
             'y': y,
             'angle': angle,
             'damage': damage,
-            'ball_uuid' : ball_uuid
+            'ball_uuid': ball_uuid,
+            'type' : type
         }))
     }
 
@@ -1109,14 +1192,15 @@ class NoticeBoard extends AcGameObject {
         }
     }
 
-    send_shoot_fireball(tx, ty, ball_uuid) {
+    send_shoot_fireball(tx, ty, ball_uuid, type) {
         let outer = this
         this.ws.send(JSON.stringify({
             'event': 'shoot_fireball',
             'uuid': outer.uuid,
             'tx': tx,
             'ty': ty,
-            'ball_uuid': ball_uuid
+            'ball_uuid': ball_uuid,
+            'type' : type
         }))
     }
 
@@ -1192,7 +1276,6 @@ class NoticeBoard extends AcGameObject {
     }
 
     resize() {
-        console.log('resize');
         this.width = this.$playground.width()
         this.height = this.$playground.height()
         let unit = Math.min(this.width / 16, this.height / 9)
@@ -1208,18 +1291,21 @@ class NoticeBoard extends AcGameObject {
 
     show(mode) {  // 打开playground界面
         this.$playground.show();
-
         this.width = this.$playground.width();
         this.height = this.$playground.height();
-        // console.log(this.width, this.height);        
+
         this.resize()
+
         this.game_map = new GameMap(this);
+        this.score_board = new ScoreBoard(this)
+
         this.players = []
         this.state = 'waitting'
+
         if (mode === 'single') {
             this.mode = 'single'
             this.state = 'fighting'
-            for (let i = 0 ; i < 5; i ++) {
+            for (let i = 0 ; i < 10; i ++) {
                 this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, this.get_random_color(), this.height * 0.15 / this.scale, 'robot', null, null))
             }
             this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, "white", this.height * 0.15 / this.scale, 'self', this.root.settings.username, this.root.settings.photo))
@@ -1227,6 +1313,7 @@ class NoticeBoard extends AcGameObject {
             this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, "white", this.height * 0.15 / this.scale, 'self', this.root.settings.username, this.root.settings.photo))
             this.notice_board = new NoticeBoard(this)
             this.chat_field = new ChatField(this)
+
             this.player_count = 0
             this.mode = 'multi'
             this.multiplayer_socket = new MultiPlayerSocket(this, this.players[0].uuid)
@@ -1234,7 +1321,25 @@ class NoticeBoard extends AcGameObject {
     }
 
     hide() {  // 关闭playground界面
-        this.$playground.hide();
+        while (this.players && this.players.length > 0) {
+            this.players[0].destroy()
+        }
+
+        if (this.game_map) {
+            this.game_map.destroy()
+            this.game_map = null
+        }
+        if (this.notice_board) {
+            this.notice_board.destroy()
+            this.notice_board = null
+        }
+        if (this.score_board) {
+            this.score_board.destroy()
+            this.score_board = null
+        }
+
+        this.$playground.empty()
+        this.$playground.hide()
     }
 
 }
@@ -1531,16 +1636,20 @@ class Settings {
         this.id = id;
         this.$ac_game = $('#' + id);
         this.AcWingOS = AcWingOS
-
+        document.body.style.zoom = 1 / window.devicePixelRatio
+        console.log(window.devicePixelRatio)
         this.settings = new Settings(this);
         this.menu = new AcGameMenu(this);
         this.playground = new AcGamePlayground(this);
         
         this.start()
+        
     }
 
     start() {
-
+        $(window).on('contextmenu', function () {
+            return false
+        })
         //this.menu.hide()
        // this.playground.show()   
     }

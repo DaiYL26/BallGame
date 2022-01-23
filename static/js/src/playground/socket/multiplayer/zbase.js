@@ -100,7 +100,7 @@ class MultiPlayerSocket {
         }
     }
 
-    send_attack(attackee_uuid, x, y, angle, damage, ball_uuid) {
+    send_attack(attackee_uuid, x, y, angle, damage, ball_uuid, type) {
         let outer = this
         this.ws.send(JSON.stringify({
             'event': 'attack',
@@ -110,7 +110,8 @@ class MultiPlayerSocket {
             'y': y,
             'angle': angle,
             'damage': damage,
-            'ball_uuid' : ball_uuid
+            'ball_uuid': ball_uuid,
+            'type' : type
         }))
     }
 
@@ -123,14 +124,15 @@ class MultiPlayerSocket {
         }
     }
 
-    send_shoot_fireball(tx, ty, ball_uuid) {
+    send_shoot_fireball(tx, ty, ball_uuid, type) {
         let outer = this
         this.ws.send(JSON.stringify({
             'event': 'shoot_fireball',
             'uuid': outer.uuid,
             'tx': tx,
             'ty': ty,
-            'ball_uuid': ball_uuid
+            'ball_uuid': ball_uuid,
+            'type' : type
         }))
     }
 

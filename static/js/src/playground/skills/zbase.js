@@ -74,7 +74,7 @@ class FireBall extends AcGameObject {
 
         // 联机模式下
         if (this.playground.mode === 'multi') {
-            this.playground.multiplayer_socket.send_attack(player.uuid, player.x, player.y, angle, this.damage, this.uuid)
+            this.playground.multiplayer_socket.send_attack(player.uuid, player.x, player.y, angle, this.damage, this.uuid, 'fireball')
         }
 
         // 让玩家受伤

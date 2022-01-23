@@ -75,7 +75,7 @@ class MultiPlayer(AsyncWebsocketConsumer):
         })
 
     
-    async def shoot_fireball(self, data):
+    async def shoot_fireball(self, data):        
         await self.channel_layer.group_send(self.room_name, {
             'type' : 'group_send_event',
             'event' : 'shoot_fireball',
@@ -85,8 +85,36 @@ class MultiPlayer(AsyncWebsocketConsumer):
             'ball_uuid' : data['ball_uuid']
         })
 
-    
+    # 广播攻击事件
     async def attack(self, data):
+        if not self.room_name:
+            return
+        
+        players = cache.get(self.room_name)
+        for player in players:
+            if player['uuid'] == data['attackee_uuid']:
+                player['hp'] -= 20
+                if player['hp'] <= 0: # 防止修改血量
+                    data['damage'] = 9999999
+        
+        cache.set(self.room_name, players, 3600)
+
+        # 更新积分
+        remain_cnt = 0
+        for player in players:
+            if player['hp'] > 0:
+                remain_cnt += 1
+        if remain_cnt <= 1:
+            def db_update_player_score(username, score):
+                player = Player.objects.get(user__username=username)
+                player.score += score
+                player.save()
+            for player in players:
+                if player['hp'] <= 0:
+                    await database_sync_to_async(db_update_player_score)(player['username'], -5)
+                else:
+                    await database_sync_to_async(db_update_player_score)(player['username'], 10)
+
         await self.channel_layer.group_send(self.room_name, {
             'type' : 'group_send_event',
             'event' : 'attack',
@@ -97,7 +125,6 @@ class MultiPlayer(AsyncWebsocketConsumer):
             'ball_uuid' : data['ball_uuid'],
             'angle' : data['angle'],
             'damage' : data['damage'],
-            'ball_uuid' : data['ball_uuid']
         })
 
 
@@ -124,7 +151,6 @@ class MultiPlayer(AsyncWebsocketConsumer):
 
     
     async def receive(self, text_data=None, bytes_data=None):
-        print(threading.currentThread().ident, multiprocessing.current_process().pid, id(self))
         data = json.loads(text_data)
         # print(data)
         if data['event'] == 'create_player':

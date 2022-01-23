@@ -21,7 +21,6 @@ class AcGamePlayground {
     }
 
     resize() {
-        console.log('resize');
         this.width = this.$playground.width()
         this.height = this.$playground.height()
         let unit = Math.min(this.width / 16, this.height / 9)
@@ -37,18 +36,21 @@ class AcGamePlayground {
 
     show(mode) {  // 打开playground界面
         this.$playground.show();
-
         this.width = this.$playground.width();
         this.height = this.$playground.height();
-        // console.log(this.width, this.height);        
+
         this.resize()
+
         this.game_map = new GameMap(this);
+        this.score_board = new ScoreBoard(this)
+
         this.players = []
         this.state = 'waitting'
+
         if (mode === 'single') {
             this.mode = 'single'
             this.state = 'fighting'
-            for (let i = 0 ; i < 5; i ++) {
+            for (let i = 0 ; i < 10; i ++) {
                 this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, this.get_random_color(), this.height * 0.15 / this.scale, 'robot', null, null))
             }
             this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, "white", this.height * 0.15 / this.scale, 'self', this.root.settings.username, this.root.settings.photo))
@@ -56,6 +58,7 @@ class AcGamePlayground {
             this.players.push(new Player(this, this.width / 2 / this.scale, this.height / 2 / this.scale, this.height * 0.05 / this.scale, "white", this.height * 0.15 / this.scale, 'self', this.root.settings.username, this.root.settings.photo))
             this.notice_board = new NoticeBoard(this)
             this.chat_field = new ChatField(this)
+
             this.player_count = 0
             this.mode = 'multi'
             this.multiplayer_socket = new MultiPlayerSocket(this, this.players[0].uuid)
@@ -63,7 +66,25 @@ class AcGamePlayground {
     }
 
     hide() {  // 关闭playground界面
-        this.$playground.hide();
+        while (this.players && this.players.length > 0) {
+            this.players[0].destroy()
+        }
+
+        if (this.game_map) {
+            this.game_map.destroy()
+            this.game_map = null
+        }
+        if (this.notice_board) {
+            this.notice_board.destroy()
+            this.notice_board = null
+        }
+        if (this.score_board) {
+            this.score_board.destroy()
+            this.score_board = null
+        }
+
+        this.$playground.empty()
+        this.$playground.hide()
     }
 
 }

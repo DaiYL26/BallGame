@@ -75,9 +75,9 @@ class Player extends AcGameObject {
     add_listening_events() {
         let outer = this
         // canvas 内禁止鼠标右键
-        this.playground.game_map.$canvas.on('contextmenu', function () {
-            return false
-        })
+        // this.playground.game_map.$canvas.on('contextmenu', function () {
+        //     return false
+        // })
 
         //鼠标移动事件
         this.playground.game_map.$canvas.mousemove(function (e) {
@@ -85,8 +85,8 @@ class Player extends AcGameObject {
                 return false
 
             const binding_rect = outer.ctx.canvas.getBoundingClientRect()
-            let tx = (e.clientX - binding_rect.left) / outer.playground.scale
-            let ty = (e.clientY - binding_rect.top) / outer.playground.scale
+            let tx = (e.clientX * window.devicePixelRatio - binding_rect.left) / outer.playground.scale
+            let ty = (e.clientY * window.devicePixelRatio - binding_rect.top) / outer.playground.scale
             outer.mouse_position_x = tx
             outer.mouse_position_y = ty
             outer.update_skill_direct()
@@ -118,15 +118,15 @@ class Player extends AcGameObject {
                 // if ()
                 // outer.playground.chat_field.hide_input()
             } else if (e.which == 1) {  //发技能
-                let tx = (e.clientX - binding_rect.left) / outer.playground.scale
-                let ty = (e.clientY - binding_rect.top) / outer.playground.scale
+                let tx = (e.clientX * window.devicePixelRatio - binding_rect.left) / outer.playground.scale
+                let ty = (e.clientY * window.devicePixelRatio - binding_rect.top) / outer.playground.scale
                 if (outer.cur_skill === 'fireball') {
                     
                     let fireball = outer.shoot_fireball( tx, ty )
                     if (outer.playground.mode === 'multi') {
                         outer.playground.multiplayer_socket.send_shoot_fireball(tx, ty, fireball.uuid)
                     }
-                    outer.fireball_coldtime = 3
+                    outer.fireball_coldtime = 1
                 }
                 
                 outer.cur_skill = null
@@ -192,8 +192,10 @@ class Player extends AcGameObject {
 
     // 更新移动目的地
     update_move_target(e, binding_rect) {
-        let tx = (e.clientX - binding_rect.left) / this.playground.scale
-        let ty = (e.clientY - binding_rect.top) / this.playground.scale
+        let tx = (e.clientX * window.devicePixelRatio - binding_rect.left ) / this.playground.scale 
+        let ty = (e.clientY * window.devicePixelRatio - binding_rect.top ) / this.playground.scale
+        console.log(e.clientX, binding_rect.left, this.playground.scale);
+        console.log(e.clientY, binding_rect.top, this.playground.scale);
 
         if (this.playground.mode === 'multi') {
             console.log('send move to');
@@ -278,8 +280,15 @@ class Player extends AcGameObject {
                 if (player.role === 'self') {
                     console.log('unbinding ...');
                     this.unbind_listening_events()
+                    if (this.playground.state === 'fighting') {
+                        this.playground.score_board.lose()
+                    }
                 }
             }
+        }
+
+        if (this.playground.state === 'fighting' && this.playground.players.length === 1 && this.playground.players[0].role === 'self') {
+            this.playground.score_board.win()
         }
     }
     
