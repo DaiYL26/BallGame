@@ -64,6 +64,7 @@ class MultiPlayer(AsyncWebsocketConsumer):
 
     async def group_send_event(self, data):
         await self.send(text_data=json.dumps(data))
+        
 
     async def move_to(self, data):
         await self.channel_layer.group_send(self.room_name, {
@@ -149,10 +150,18 @@ class MultiPlayer(AsyncWebsocketConsumer):
             'text' : data['text']
         })
 
+
+    async def accelerate(self, data):
+        # print('accelerate')
+        await self.channel_layer.group_send(self.room_name, {
+            'type' : 'group_send_event',
+            'event' : 'accelerate',
+            'uuid' : data['uuid'],
+        })
+
     
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
-        # print(data)
         if data['event'] == 'create_player':
             await self.create_player(data)
         elif data['event'] == 'move_to':
@@ -165,3 +174,5 @@ class MultiPlayer(AsyncWebsocketConsumer):
             await self.blink(data)
         elif data['event'] == 'message':
             await self.message(data)
+        elif data['event'] == 'accelerate':
+            await self.accelerate(data)

@@ -19,6 +19,7 @@ from match_system.match.match_service import Match
 from queue import Queue
 from time import sleep
 from threading import Thread
+from functools import reduce
 import heapq
 
 queue = Queue()
@@ -45,6 +46,13 @@ class Pool:
         heapq.heappush(self.__players, player)
 
 
+    def check_match(self, selects: List) -> bool:
+        for i in range(len(selects) - 1):
+            if not self.check_result(selects[i], selects[i + 1]):
+                return False
+        return True
+
+
     def check_result(self, a: Player, b: Player) -> bool:
         dt = abs(a.score - b.score)
         a_max_dif = a.waiting_time * 50
@@ -53,8 +61,12 @@ class Pool:
 
     
     def match_success(self, players: List) -> None:
-        print("Match Success: %s %s %s" % (players[0].username, players[1].username, players[2].username))
-        room_name = "room-%s-%s-%s" % (players[0].uuid, players[1].uuid, players[2].uuid)
+        print("Match Success: ", end=' ')
+        room_name = "room"
+        for player in players:
+            print(player.username, end=' ')
+            room_name += '-' + player.uuid
+        
         _players = []
         for p in players:
             async_to_sync(channel_layer.group_add) (room_name, p.channel_name)
@@ -84,12 +96,16 @@ class Pool:
         while len(self.__players) >= 3:
             flag = False
             for i in range(len(self.__players) - 2):
-                a, b, c = self.__players[i], self.__players[i + 1], self.__players[i + 2]
-                if self.check_result(a, b) and self.check_result(b, c) and self.check_result(a, c):
-                    self.match_success([a, b, c])
+                selects = []
+                for j in range(3):
+                    selects.append(self.__players[i + j])
+                if self.check_match(selects):
+                    self.match_success(selects)
+                    print('success')
                     self.__players = self.__players[:i] + self.__players[i + 3:]
                     flag = True
                     break
+                
             if not flag:
                 break
         

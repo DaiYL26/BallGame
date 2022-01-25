@@ -3,7 +3,6 @@ class MultiPlayerSocket {
         this.playground = playground
         this.uuid = uuid
         this.ws = new WebSocket("wss://app122.acapp.acwing.com.cn/wss/multiplayer/")
-        
         this.start()
     }
 
@@ -34,6 +33,7 @@ class MultiPlayerSocket {
                 return false
             
             let event = data.event
+            console.log(data);
             if (event === 'create_player') {
                 console.log(data);
                 outer.receive_create_player(uuid, data.username, data.photo)
@@ -51,6 +51,9 @@ class MultiPlayerSocket {
             } else if (event === 'message') {
                 console.log('receive message');
                 outer.receive_message(data.username, data.text)
+            } else if (event === 'accelerate') {
+                console.log('accelerate');
+                outer.receive_accelerate(uuid)
             }
         }
     }
@@ -64,6 +67,21 @@ class MultiPlayerSocket {
         }
 
         return null
+    }
+
+    send_accelerate() {
+        let outer = this
+        this.ws.send(JSON.stringify({
+            'event': 'accelerate',
+            'uuid': outer.uuid,
+        }))
+    }
+
+    receive_accelerate(uuid) {
+        let player = this.get_player(uuid)
+        if (player) {
+            player.start_accelerate()
+        }
     }
 
     send_message(username, text) {
@@ -171,11 +189,11 @@ class MultiPlayerSocket {
     receive_create_player(uuid, username, photo) {
         let player = new Player(
             this.playground,
-            this.playground.width / 2 / this.playground.scale,
-            0.5,
+            this.playground.vwidth / 2 / this.playground.scale,
+            this.playground.vheight / 2 / this.playground.scale,
             0.05,
             "white",
-            0.15,
+            0.2,
             "enemy",
             username,
             photo,

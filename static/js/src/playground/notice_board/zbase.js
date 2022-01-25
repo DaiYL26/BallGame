@@ -1,10 +1,11 @@
 class NoticeBoard extends AcGameObject {
 
-    constructor(playground) {
+    constructor(playground, player_cnt) {
         super()
         this.playground = playground
         this.ctx = playground.game_map.ctx
         this.text = '已就绪 0 人'
+        this.player_cnt = player_cnt
     }
 
     start() {
@@ -15,7 +16,7 @@ class NoticeBoard extends AcGameObject {
         this.text = text
     }
 
-    update() {
+    last_update() {
         this.render()
     }
     
@@ -23,7 +24,12 @@ class NoticeBoard extends AcGameObject {
         this.ctx.font = "20px serif";
         this.ctx.fillStyle = "white";
         this.ctx.textAlign = "center";
-        this.ctx.fillText(this.text, this.playground.width / 2, 20);
+        if (this.playground.state === 'waitting') {
+            this.ctx.fillText("正在匹配", this.playground.width / 2, 20);
+            this.ctx.fillText("按ESC退出匹配", this.playground.width / 2, 50);
+        } else if (this.playground.state === 'fighting') {
+            this.ctx.fillText(`${this.playground.players.length} / ${this.player_cnt}`, this.playground.width / 2, 20);
+        }
     }
 
 }

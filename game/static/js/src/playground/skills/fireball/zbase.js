@@ -9,7 +9,7 @@ class FireBall extends AcGameObject {
         this.y = y
         this.vx = vx
         this.vy = vy
-        this.color = color
+        this.color = '#ff4702'
         this.speed = speed
         this.radius = radius
         this.move_length = move_length

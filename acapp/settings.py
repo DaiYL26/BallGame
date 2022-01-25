@@ -45,6 +45,8 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [("redis://:moonlight@120.77.222.189:63799/1")],
+            "capacity": 1500,
+            "expiry": 10,
         },
     },
 }

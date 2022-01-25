@@ -9,7 +9,7 @@ class FireBall extends AcGameObject {
         this.y = y
         this.vx = vx
         this.vy = vy
-        this.color = color
+        this.color = '#ff4702'
         this.speed = speed
         this.radius = radius
         this.move_length = move_length
@@ -96,9 +96,10 @@ class FireBall extends AcGameObject {
     }
 
     render() {
+        let ctx_x = this.x - this.playground.cx, ctx_y = this.y - this.playground.cy;
         let scale = this.playground.scale
         this.ctx.beginPath();
-        this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2, false);
+        this.ctx.arc(ctx_x * scale, ctx_y * scale, this.radius * scale, 0, Math.PI * 2, false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
     }
