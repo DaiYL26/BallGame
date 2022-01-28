@@ -1,10 +1,8 @@
 export class AcGame {
-    constructor (id, AcWingOS) {
+    constructor (id) {
         this.id = id;
         this.$ac_game = $('#' + id);
-        this.AcWingOS = AcWingOS
         document.body.style.zoom = 1 / window.devicePixelRatio
-        console.log(window.devicePixelRatio)
         this.settings = new Settings(this);
         this.menu = new AcGameMenu(this);
         this.playground = new AcGamePlayground(this);

@@ -54,6 +54,8 @@ class MultiPlayerSocket {
             } else if (event === 'accelerate') {
                 console.log('accelerate');
                 outer.receive_accelerate(uuid)
+            } else if (event === 'poison_attack') {
+                outer.receive_poison_attack(data.attackee_uuid, data.x, data.y, data.damage)
             }
         }
     }
@@ -67,6 +69,31 @@ class MultiPlayerSocket {
         }
 
         return null
+    }
+
+    send_poison_attack(attackee_uuid, x, y, damage, type) {
+        let outer = this
+        this.ws.send(JSON.stringify({
+            'event': 'poison_attack',
+            'uuid': outer.uuid,
+            'attackee_uuid': attackee_uuid,
+            'x': x,
+            'y': y,
+            'damage': damage,
+            'type' : type
+        }))
+    }
+
+    receive_poison_attack(attackee_uuid, x, y, damage) {
+        let player = this.get_player(attackee_uuid)
+        if (player) {
+            player.x = x
+            player.y = y
+            if (damage > 100) {
+                player.hp -= damage
+            }
+            player.attacked_by_poison()
+        }
     }
 
     send_accelerate() {

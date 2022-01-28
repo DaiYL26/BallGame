@@ -25,7 +25,7 @@ class MiniMap extends AcGameObject {
             if (player) {
                 let x = player.x * scale, y = player.y * scale
                 if (player.role === 'self') {
-                    this.ctx.fillStyle = 'white';
+                    this.ctx.fillStyle = 'skyblue';
                 } else {
                     this.ctx.fillStyle = 'pink'
                 }

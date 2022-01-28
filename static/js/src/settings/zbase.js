@@ -122,10 +122,10 @@ class Settings {
 
     acapp_login(appid, redirect_uri, scope, state) {
         let outer = this;
-        console.log(appid, redirect_uri, scope, state);
+        // // console.log(appid, redirect_uri, scope, state);
         this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function(resp) {
-            console.log("called from acapp_login function");
-            console.log(resp);
+            // // console.log("called from acapp_login function");
+            // // console.log(resp);
             if (resp.result === "success") {
                 outer.username = resp.username;
                 outer.photo = resp.photo;
@@ -140,7 +140,7 @@ class Settings {
         let outer = this;
 
         $.ajax({
-            url: "https://app122.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
+            url: "/settings/acwing/acapp/apply_code/",
             type: "GET",
             success: function(resp) {
                 if (resp.result === "success") {
@@ -184,12 +184,12 @@ class Settings {
     }
 
     acwing_login() {
-        console.log('click icon');
+        // // console.log('click icon');
         $.ajax({
-            url: 'https://app122.acapp.acwing.com.cn/settings/acwing/web/apply_code/',
+            url: '/settings/acwing/web/apply_code/',
             type: 'GET',
             success: (resp) => {
-                console.log(resp);
+                // // console.log(resp);
                 $(location).attr('href', resp.apply_code_url);
             }
         })
@@ -203,7 +203,7 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: "https://app122.acapp.acwing.com.cn/settings/register/",
+            url: "/settings/register/",
             type: "POST",
             data: {
                 username: username,
@@ -211,7 +211,7 @@ class Settings {
                 password_confirm: password_confirm
             },
             success: function(resp) {
-                console.log(resp);
+                // console.log(resp);
                 if (resp.result === "success") {
                     location.reload();
                 } else {
@@ -229,14 +229,14 @@ class Settings {
         this.$login_error_message.empty();
 
         $.ajax({
-            url: "https://app122.acapp.acwing.com.cn/settings/login",
+            url: "/settings/login",
             type: "GET",
             data: {
                 username: username,
                 password: password,
             },
             success: function(resp) {
-                console.log(resp);
+                // console.log(resp);
                 if (resp.result === "success") {
                     location.reload();
                 } else {
@@ -260,13 +260,13 @@ class Settings {
     getUserInfo() {
         let outer = this
         $.ajax({
-            url: 'https://app122.acapp.acwing.com.cn/settings/getUserInfo',
+            url: '/settings/getUserInfo',
             type: 'GET',
             data: {
                 platform: outer.platform
             },
             success: (resp) => {
-                console.log(resp)
+                // console.log(resp)
                 if (resp.result === 'success') {
                     outer.username = resp.username
                     outer.photo = resp.photo

@@ -4,21 +4,91 @@ class LevelChoice {
         this.$choice = $(`
         <div class="ac-game-menu">
             <div class="ac-game-menu-field">
-                <div class="ac-game-menu-field-item ac-game-menu-field-item-single-mode">
-                    
+                <div class="ac-game-menu-field-item ac-game-menu-field-item-single-esay">
+                    简单
                 </div>
                 <br>
-                <div class="ac-game-menu-field-item ac-game-menu-field-item-multi-mode">
-                    多人模式
+                <div class="ac-game-menu-field-item ac-game-menu-field-item-single-difficult">
+                    困难
                 </div>
                 <br>
-                <div class="ac-game-menu-field-item ac-game-menu-field-item-settings">
-                    设置
+                <div class="ac-game-menu-field-item ac-game-menu-field-item-single-hell">
+                    噩梦
+                </div>
+                <br>
+                <div class="ac-game-menu-field-item ac-game-menu-field-item-single-back">
+                    返回
                 </div>
             </div>
         </div>
         `)
+
+        this.menu.root.$ac_game.append(this.$choice)
+        this.$easy = this.$choice.find('.ac-game-menu-field-item-single-esay')
+        this.$difficult = this.$choice.find('.ac-game-menu-field-item-single-difficult')
+        this.$hell = this.$choice.find('.ac-game-menu-field-item-single-hell')
+        this.$back = this.$choice.find('.ac-game-menu-field-item-single-back')
+
+        this.start()
     }
+
+    start() {
+        this.hide()
+        this.add_listening_events()
+    }
+
+    add_listening_events() {
+        let outer = this
+
+        this.$easy.click(function () {
+            console.log('easy');
+            let easy = {
+                level: 1,
+                robot_num: 15,
+                robot_speed: 1,
+                is_track: false
+            }
+            outer.menu.root.playground.show('single', easy)
+        })
+
+        this.$difficult.click(function () {
+            console.log('difficult');
+            let difficult = {
+                level: 2,
+                robot_num: 24,
+                robot_speed: 1.1,
+                is_track: true
+            }
+            outer.menu.root.playground.show('single', difficult)
+        })
+
+        this.$hell.click(function () {
+            console.log('hell');
+            let hell = {
+                level: 2,
+                robot_num: 29,
+                robot_speed: 1.3,
+                is_track: true
+            }
+            outer.menu.root.playground.show('single', hell)
+        })
+
+        this.$back.click(function () {
+            console.log('back');
+            outer.hide()
+            outer.menu.show()
+        })
+    }
+
+    show() {
+        this.$choice.show()
+    }
+
+    hide() {
+        this.$choice.hide()
+    }
+
+
 }class AcGameMenu {
     constructor(root) {
         this.root = root;
@@ -51,6 +121,10 @@ class LevelChoice {
         this.$settings = this.$menu.find('.ac-game-menu-field-item-settings')
         this.$logout = this.$menu.find('.ac-game-menu-field-item-logout')
 
+        this.choice = new LevelChoice(this)
+
+        this.personalize = new Personalize(this)
+
         this.start()
     }
 
@@ -63,8 +137,9 @@ class LevelChoice {
         let outer = this
 
         this.$single_mode.click(function () {
-           outer.hide()
-           outer.root.playground.show('single')
+            outer.hide()
+            // outer.root.playground.show('single')
+            outer.choice.show()
         });
         this.$multi_mode.click(function () {
             console.log("click multi_mode")
@@ -73,6 +148,9 @@ class LevelChoice {
         })
         this.$settings.click(function () {
             console.log("click settings")
+            outer.hide()
+            outer.personalize.show()
+            console.log(outer.personalize);
         })
         this.$logout.click(function () {
             $.get('https://app122.acapp.acwing.com.cn/settings/logout/').then(res => {
@@ -91,7 +169,252 @@ class LevelChoice {
         this.$menu.hide()
     }
 }
-let AC_GAME_OBJECTS = [];
+class Personalize {
+    constructor(menu) {
+        this.menu = menu
+        this.$panel = $(`
+        <div class="game-user-info">
+            <div class="game-user-info-wrapper">
+                <img id="game-user-info-wrapper-avatar" src="" alt="">
+                <button type="button" class="btn btn-info btn-sm" id="choice">更换头像</button>
+                <div class="game-user-info-wrapper-item">
+                    <h5>用户名</h5>
+                </div>            
+                <div class="game-user-info-wrapper-item">
+                    <input id="game-user-info-wrapper-item-username" type="text" placeholder="用户名">
+                </div>
+                <div class="game-user-info-wrapper-item">
+                    <h5 id="update_pwd">修改密码</h5>
+                </div>
+                <div class="game-user-info-wrapper-update-pwd">
+                    <div class="game-user-info-wrapper-item">
+                        <h5>旧密码</h5>
+                    </div>            
+                    <div class="game-user-info-wrapper-item">
+                        <input id="game-user-info-wrapper-item-old" type="password" placeholder="旧密码">
+                    </div>
+                    <div class="game-user-info-wrapper-item">
+                        <h5>新密码</h5>
+                    </div>            
+                    <div class="game-user-info-wrapper-item">
+                        <input id="game-user-info-wrapper-item-first" type="password" placeholder="新密码">
+                    </div>
+                    <br>
+                    <div class="game-user-info-wrapper-item">
+                        <input id="game-user-info-wrapper-item-second" type="password" placeholder="再次输入密码">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-info btn-sm" id="user-info-save">保存</button>
+                <h5 class="game-user-info-wrapper-back">返回</h5>
+            </div>
+            <input class="inputFile" type="file" accept="image/*" id="imgReader">
+            <div id="myModal" class="modal" tabindex="-1" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title">选择合适的区域</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body p-0 m-2">
+                        <img id="cropImg">
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="avatar_save">确定</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        `)
+        this.menu.root.$ac_game.append(this.$panel)
+
+        this.$avatar = $('#game-user-info-wrapper-avatar')
+        this.$username = $('#game-user-info-wrapper-item-username')
+        this.$update_pwd = $('#update_pwd')
+        this.update_pwd = false
+        this.$pwd_field = $('.game-user-info-wrapper-update-pwd')
+        this.$pwd_old = $('#game-user-info-wrapper-item-old')
+        this.$pwd_first = $('#game-user-info-wrapper-item-first')
+        this.$pwd_second = $('#game-user-info-wrapper-item-second')
+
+        this.CROPPER = null
+
+        this.hide()
+        this.start()
+    }
+
+    start() {
+        this.add_listening_events()
+        
+    }
+
+    show() {
+        this.$panel.show()
+        this.$username.val(this.menu.root.settings.username)
+        this.$avatar.attr("src", this.menu.root.settings.photo)
+        this.$pwd_field.hide()
+    }
+
+    hide() {
+        this.$panel.hide()
+    }
+
+    add_listening_events() {
+        this.add_listening_avatar()
+        this.add_listening_save()
+        this.add_listening_back()
+        this.add_listening_update_pwd()
+    }
+
+    add_listening_update_pwd() {
+        let outer = this
+        this.$update_pwd.click(function () {
+            console.log('update_pwd');
+            if (!outer.update_pwd) {
+                outer.$update_pwd.text('收起')
+                outer.update_pwd = true
+                outer.$pwd_field.fadeIn()
+                console.log('update_pwd', 'false');
+            } else {
+                outer.$update_pwd.text('修改密码')
+                outer.update_pwd = false
+                outer.$pwd_field.fadeOut()
+                console.log('update_pwd', 'true');
+            }
+        })
+    }
+    
+    add_listening_back() {
+        let outer = this
+        $('.game-user-info-wrapper-back').click(function () {
+            console.log('user-info-back');
+            outer.hide()
+            outer.menu.show()
+        })
+    }
+
+    add_listening_save() {
+        let outer = this
+        $('#user-info-save').click(function () {
+            outer.change_user_info()
+        })
+    }
+
+    add_listening_avatar() {
+        let outer = this
+        $('#imgReader').change(function loadingImg(event) {
+            $('#myModal').modal('show')
+            let reader = new FileReader();
+            if (event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+                reader.onload = (e) => {
+                    let dataURL = reader.result;
+                    document.querySelector('#cropImg').src = dataURL;
+                    const image = document.getElementById('cropImg');
+                    if (outer.CROPPER) {
+                        outer.CROPPER.destroy()
+                    }
+                    outer.CROPPER = new Cropper(image, {
+                        aspectRatio: 1 / 1,
+                        viewMode: 1,
+                        minContainerWidth: 300,
+                        minContainerHeight: 300,
+                        dragMode: 'move',
+                    })
+                }
+            }
+        })
+        
+
+        $('#choice').click(function () {
+            $('#imgReader').click()
+        })
+
+        $('#avatar_save').click(function () {
+            outer.CROPPER.getCroppedCanvas({
+                maxWidth: 500,
+                maxHeight: 500,
+                fillColor: '#fff',
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'low',
+            }).toBlob((blob) => {
+                let reader = new FileReader()
+                reader.readAsDataURL(blob)
+                reader.onload = (e) => {
+                    console.log(e.target.result)
+                    $.post('https://app122.acapp.acwing.com.cn/settings/change/avatar/', {
+                        'img': e.target.result
+                    }, function (e) {
+                        if (e.result === 'success') {
+                            console.log(e.url);
+                            outer.$avatar.attr("src", e.url);
+                            $('#myModal').modal('hide')
+                        }
+                    })
+                }
+            })
+        })
+    }
+
+    change_user_info() {
+        let username = this.verfiy_username()
+
+        if (this.update_pwd) {
+            let old = this.$pwd_old.val()
+            let pwd = this.verfiy_pwd()
+
+            if (old && pwd) {
+                $.post('/settings/change/pwd/', {
+                    old_pwd: old,
+                    new_pwd: pwd
+                }, function (e) {
+                    alert(e.msg)
+                })
+            }
+        }
+
+        if (username != this.menu.root.settings.username) {
+            $.ajax({
+                type: 'POST',
+                url: '/settings/change/username/',
+                headers: {
+                    'X-CSRFToken': $.cookie('csrftoken')
+                },
+                data: {
+                    username: username,
+                },
+                success: function (e) {
+                    alert(e.msg)
+                }
+            })
+        }
+
+        // $.post()
+    }
+
+    verfiy_username() {
+        let username = this.$username.val()
+        console.log(username);
+        if (username) {
+            return username
+        }
+        return ''
+    }
+
+    verfiy_pwd() {
+        let pwd_old = this.$pwd_old.val()
+        let pwd_first = this.$pwd_first.val()
+        let pwd_second = this.$pwd_second.val()
+        console.log(pwd_first, pwd_second);
+        if (pwd_old && pwd_first && pwd_first === pwd_second) {
+            return pwd_first
+        }
+        return ''
+    }
+}let AC_GAME_OBJECTS = [];
 
 class AcGameObject {
     constructor() {
@@ -349,7 +672,7 @@ class MiniMap extends AcGameObject {
             if (player) {
                 let x = player.x * scale, y = player.y * scale
                 if (player.role === 'self') {
-                    this.ctx.fillStyle = 'white';
+                    this.ctx.fillStyle = 'skyblue';
                 } else {
                     this.ctx.fillStyle = 'pink'
                 }
@@ -485,10 +808,10 @@ class MiniMap extends AcGameObject {
 
         if (this.role === 'self') {
             this.fireball_img = new Image()
-            this.fireball_img.src = "https://cdn.acwing.com/media/article/image/2021/12/02/1_9340c86053-fireball.png"
+            this.fireball_img.src = "/static/image/skill/fireball.png"
 
             this.blink_img = new Image()
-            this.blink_img.src = "https://cdn.acwing.com/media/article/image/2021/12/02/1_daccabdc53-blink.png"
+            this.blink_img.src = "/static/image/skill/blink.png"
             
             this.accelerate_img = new Image()
             this.accelerate_img.src = '/static/image/skill/accelerate.png'
@@ -668,13 +991,16 @@ class MiniMap extends AcGameObject {
     update_move_target(e, binding_rect) {
         let tx = (e.clientX * window.devicePixelRatio - binding_rect.left ) / this.playground.scale + this.playground.cx
         let ty = (e.clientY * window.devicePixelRatio - binding_rect.top ) / this.playground.scale + this.playground.cy
-        console.log(e.clientX, binding_rect.left, this.playground.scale);
-        console.log(e.clientY, binding_rect.top, this.playground.scale);
+        // console.log(e.clientX, binding_rect.left, this.playground.scale);
+        // console.log(e.clientY, binding_rect.top, this.playground.scale);
+        // console.log('tx, ty', tx, ty);
 
         if (this.playground.mode === 'multi') {
             console.log('send move to');
             this.playground.multiplayer_socket.send_move_to(this.uuid, tx, ty)
         }
+
+        this.click_particle(5, tx, ty)
 
         this.move_to( tx, ty )
     }
@@ -702,6 +1028,9 @@ class MiniMap extends AcGameObject {
 
     attacked_by_poison() {
         if (this.poison_spent > 2) {
+            if (this.playground.mode === 'multi' && this.role === 'self') {
+                this.playground.multiplayer_socket.send_poison_attack(this.uuid, this.x, this.y, 5, 'poison')
+            }
             this.poison_spent = 0
             this.hp -= 5
             this.split_particle(10)
@@ -844,6 +1173,16 @@ class MiniMap extends AcGameObject {
     }
 
     update_robot_attack() {
+        if (this.role === 'robot' && this.playground.level.is_track && this.spent_time > 3 && Math.random() < this.playground.level.robot_speed / 300) {
+            for (let i = 0; i < this.playground.players.length; i++) {
+                let player = this.playground.players[i]
+                if (player.role === 'self' && this.get_dist(player.x, player.y) < 1) {
+                    this.shoot_fireball(player.x, player.y);
+                    console.log('attack self');
+                }
+            }
+        }
+
         // 控制电脑玩家发射火球
         if (this.role === 'robot' && this.spent_time > 3 && Math.random() < 1 / (15 * this.playground.players.length)) {
             // 随机选取玩家
@@ -872,11 +1211,11 @@ class MiniMap extends AcGameObject {
             y = Math.random() * this.playground.vheight / scale
         } while (this.check_poison_state(x, y))
         
-        if (Math.random() < 1 / (1.5 * this.playground.players.length)) {
+        if (Math.random() < this.playground.level.robot_speed / (1.5 * this.playground.players.length)) {
             for (let i = 0; i < this.playground.players.length; i++) {
                 if (this.playground.players[i].role === 'self') {
-                    x = this.playground.players[i].x 
-                    y = this.playground.players[i].y 
+                    x = this.playground.players[i].x * 0.9
+                    y = this.playground.players[i].y * 0.9
                 }
             }
         }
@@ -920,7 +1259,7 @@ class MiniMap extends AcGameObject {
                     this.update_robot_move()
                 }
             } else {
-                if (this.role === 'robot' && !this.secure && Math.random() < 1 / 50) {
+                if (this.role === 'robot' && !this.secure && Math.random() < 1 / 60) {
                     this.update_robot_move()
                 }
 
@@ -938,6 +1277,21 @@ class MiniMap extends AcGameObject {
                     this.update_skill_direct()
                 }
             }
+        }
+    }
+
+    click_particle(num, x, y) {
+        for (let i = 0; i < num; i ++ ) {
+            // 获取粒子散发的角度，速度，距离
+            // let x = this.x, y = this.y;
+            let radius = Math.max(this.radius * Math.random() * 0.2, 0.005);
+            let angle = Math.PI * 2 * Math.random();
+            let vx = Math.cos(angle), vy = Math.sin(angle);
+            let color = this.color;
+            let speed = 0.2;
+            let move_length = 0.2;
+            // 发出粒子
+            new Particle(this.playground, x, y, radius, vx, vy, color, speed, move_length);
         }
     }
 
@@ -978,7 +1332,7 @@ class MiniMap extends AcGameObject {
         this.damage_x = Math.cos(angle)
         this.damage_y = Math.sin(angle)
         this.damage_speed = damage * this.radius * 2
-        this.speed *= 1.1
+        this.speed *= 1.08
     }
 
     get_dist(tx, ty) {
@@ -1007,7 +1361,9 @@ class MiniMap extends AcGameObject {
 
         this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.arc(x * scale, y * scale, r * scale, 0, Math.PI * 2, false);
+        this.ctx.strokeStyle = 'rgba(233, 171, 101, 1)'
+        this.ctx.lineWidth = 8
+        this.ctx.arc(x * scale, y * scale, r * scale * 0.85, 0, Math.PI * 2, false);
         this.ctx.stroke();
         this.ctx.clip();
         this.ctx.drawImage(this.fireball_img, (x - r) * scale, (y - r) * scale, r * 2 * scale, r * 2 * scale);
@@ -1029,7 +1385,9 @@ class MiniMap extends AcGameObject {
 
         this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.arc(x * scale, y * scale, r * scale, 0, Math.PI * 2, false);
+        this.ctx.strokeStyle = 'rgba(233, 171, 101, 1)'
+        this.ctx.lineWidth = 8
+        this.ctx.arc(x * scale, y * scale, r * scale * 0.85, 0, Math.PI * 2, false);
         this.ctx.stroke();
         this.ctx.clip();
         this.ctx.drawImage(this.blink_img, (x - r) * scale, (y - r) * scale, r * 2 * scale, r * 2 * scale);
@@ -1051,7 +1409,9 @@ class MiniMap extends AcGameObject {
 
         this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.arc(x * scale, y * scale, r * scale, 0, Math.PI * 2, false);
+        this.ctx.strokeStyle = 'rgba(233, 171, 101, 1)'
+        this.ctx.lineWidth = 8
+        this.ctx.arc(x * scale, y * scale, r * scale * 0.85, 0, Math.PI * 2, false);
         this.ctx.stroke();
         this.ctx.clip();
         this.ctx.drawImage(this.accelerate_img, (x - r) * scale, (y - r) * scale, r * 2 * scale, r * 2 * scale);
@@ -1149,24 +1509,40 @@ class MiniMap extends AcGameObject {
         this.ctx.fillText(`E`, (x + 0.12) * scale, (y + 0.05) * scale);
     }
 
+    render_secure_notice() {
+        this.ctx.font = "20px serif";
+        this.ctx.fillStyle = "white";
+        this.ctx.textAlign = "center";
+        this.ctx.fillText(`${Math.floor(4 - this.spent_time)} 秒后开始战斗`, this.playground.width / 2, 50);
+    }
+
     last_update() {
         if (this.role === 'self' && this.playground.state === 'fighting') {
             this.render_fireball_icon()
             this.render_blink_icon()
             this.render_accelerate_icon()
             this.render_hp()
+            if (this.secure) {
+                this.render_secure_notice()
+            }
         }
     }
 
     // 渲染操作
     update() {
-        this.spent_time += this.timedelta / 1000;
-        this.poison_spent += this.timedelta / 1000;
+        if (this.playground.state === 'fighting') {
+            this.spent_time += this.timedelta / 1000;
+            this.poison_spent += this.timedelta / 1000;
+        }
 
         if (this.spent_time < 3 && this.secure) {
             this.speed = 0.5
         } else if (this.spent_time > 3 && this.secure) {
-            this.speed = 0.2
+            if (this.role === 'robot') {
+                this.speed = 0.2 * this.playground.level.robot_speed
+            } else {
+                this.speed = 0.2
+            }
             this.secure = false
         }
 
@@ -1185,7 +1561,7 @@ class MiniMap extends AcGameObject {
         super()
         this.playground = playground
         this.ctx = playground.game_map.ctx
-        this.shrink = -5
+        this.shrink = -10
         this.bound_x = 0
         this.bound_y = 0
     }
@@ -1510,6 +1886,8 @@ class MiniMap extends AcGameObject {
             } else if (event === 'accelerate') {
                 console.log('accelerate');
                 outer.receive_accelerate(uuid)
+            } else if (event === 'poison_attack') {
+                outer.receive_poison_attack(data.attackee_uuid, data.x, data.y, data.damage)
             }
         }
     }
@@ -1523,6 +1901,31 @@ class MiniMap extends AcGameObject {
         }
 
         return null
+    }
+
+    send_poison_attack(attackee_uuid, x, y, damage, type) {
+        let outer = this
+        this.ws.send(JSON.stringify({
+            'event': 'poison_attack',
+            'uuid': outer.uuid,
+            'attackee_uuid': attackee_uuid,
+            'x': x,
+            'y': y,
+            'damage': damage,
+            'type' : type
+        }))
+    }
+
+    receive_poison_attack(attackee_uuid, x, y, damage) {
+        let player = this.get_player(attackee_uuid)
+        if (player) {
+            player.x = x
+            player.y = y
+            if (damage > 100) {
+                player.hp -= damage
+            }
+            player.attacked_by_poison()
+        }
     }
 
     send_accelerate() {
@@ -1665,13 +2068,15 @@ class MiniMap extends AcGameObject {
         this.$playground = $(`<div class="ac-game-playground"></div>`)
         this.root.$ac_game.append(this.$playground);
         
+        this.level
+
         this.n = 2
 
         this.start();
     }
 
     get_random_color() {
-        let colors = ["skyblue", "yellow", "pink", "grey", "green", "snow"];
+        let colors = ["skyblue", "yellow", "pink", "grey", "green", "snow", "purple"];
         return colors[Math.floor(Math.random() * 5)];
     }
 
@@ -1710,7 +2115,8 @@ class MiniMap extends AcGameObject {
         }
     }
 
-    show(mode, level_params) {  // 打开playground界面
+    show(mode, level) {  // 打开playground界面
+        this.level = level
         this.$playground.show();
         this.width = this.$playground.width();
         this.height = this.$playground.height();
@@ -1730,8 +2136,8 @@ class MiniMap extends AcGameObject {
         if (mode === 'single') {
             this.mode = 'single'
             this.state = 'fighting'
-            for (let i = 0 ; i < 15; i ++) {
-                this.players.push(new Player(this, this.vwidth  * 0.5 / this.scale, this.vheight * 0.5 / this.scale, this.height * 0.05 / this.scale, this.get_random_color(), this.height * 0.2 / this.scale, 'robot', null, null))
+            for (let i = 0 ; i < level.robot_num; i ++) {
+                this.players.push(new Player(this, this.vwidth  * 0.5 / this.scale, this.vheight * 0.5 / this.scale, this.height * 0.05 / this.scale, this.get_random_color(), (this.height * 0.2 / this.scale) * level.robot_speed, 'robot', null, null))
             }
             this.notice_board = new NoticeBoard(this, this.players.length)
 
@@ -1896,10 +2302,10 @@ class Settings {
 
     acapp_login(appid, redirect_uri, scope, state) {
         let outer = this;
-        console.log(appid, redirect_uri, scope, state);
+        // // console.log(appid, redirect_uri, scope, state);
         this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function(resp) {
-            console.log("called from acapp_login function");
-            console.log(resp);
+            // // console.log("called from acapp_login function");
+            // // console.log(resp);
             if (resp.result === "success") {
                 outer.username = resp.username;
                 outer.photo = resp.photo;
@@ -1914,7 +2320,7 @@ class Settings {
         let outer = this;
 
         $.ajax({
-            url: "https://app122.acapp.acwing.com.cn/settings/acwing/acapp/apply_code/",
+            url: "/settings/acwing/acapp/apply_code/",
             type: "GET",
             success: function(resp) {
                 if (resp.result === "success") {
@@ -1958,12 +2364,12 @@ class Settings {
     }
 
     acwing_login() {
-        console.log('click icon');
+        // // console.log('click icon');
         $.ajax({
-            url: 'https://app122.acapp.acwing.com.cn/settings/acwing/web/apply_code/',
+            url: '/settings/acwing/web/apply_code/',
             type: 'GET',
             success: (resp) => {
-                console.log(resp);
+                // // console.log(resp);
                 $(location).attr('href', resp.apply_code_url);
             }
         })
@@ -1977,7 +2383,7 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: "https://app122.acapp.acwing.com.cn/settings/register/",
+            url: "/settings/register/",
             type: "POST",
             data: {
                 username: username,
@@ -1985,7 +2391,7 @@ class Settings {
                 password_confirm: password_confirm
             },
             success: function(resp) {
-                console.log(resp);
+                // console.log(resp);
                 if (resp.result === "success") {
                     location.reload();
                 } else {
@@ -2003,14 +2409,14 @@ class Settings {
         this.$login_error_message.empty();
 
         $.ajax({
-            url: "https://app122.acapp.acwing.com.cn/settings/login",
+            url: "/settings/login",
             type: "GET",
             data: {
                 username: username,
                 password: password,
             },
             success: function(resp) {
-                console.log(resp);
+                // console.log(resp);
                 if (resp.result === "success") {
                     location.reload();
                 } else {
@@ -2034,13 +2440,13 @@ class Settings {
     getUserInfo() {
         let outer = this
         $.ajax({
-            url: 'https://app122.acapp.acwing.com.cn/settings/getUserInfo',
+            url: '/settings/getUserInfo',
             type: 'GET',
             data: {
                 platform: outer.platform
             },
             success: (resp) => {
-                console.log(resp)
+                // console.log(resp)
                 if (resp.result === 'success') {
                     outer.username = resp.username
                     outer.photo = resp.photo
@@ -2061,12 +2467,10 @@ class Settings {
         this.$settings.show();
     }
 }export class AcGame {
-    constructor (id, AcWingOS) {
+    constructor (id) {
         this.id = id;
         this.$ac_game = $('#' + id);
-        this.AcWingOS = AcWingOS
         document.body.style.zoom = 1 / window.devicePixelRatio
-        console.log(window.devicePixelRatio)
         this.settings = new Settings(this);
         this.menu = new AcGameMenu(this);
         this.playground = new AcGamePlayground(this);

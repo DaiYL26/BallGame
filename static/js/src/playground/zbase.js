@@ -4,13 +4,15 @@ class AcGamePlayground {
         this.$playground = $(`<div class="ac-game-playground"></div>`)
         this.root.$ac_game.append(this.$playground);
         
+        this.level
+
         this.n = 2
 
         this.start();
     }
 
     get_random_color() {
-        let colors = ["skyblue", "yellow", "pink", "grey", "green", "snow"];
+        let colors = ["skyblue", "yellow", "pink", "grey", "green", "snow", "purple"];
         return colors[Math.floor(Math.random() * 5)];
     }
 
@@ -49,7 +51,8 @@ class AcGamePlayground {
         }
     }
 
-    show(mode, level_params) {  // 打开playground界面
+    show(mode, level) {  // 打开playground界面
+        this.level = level
         this.$playground.show();
         this.width = this.$playground.width();
         this.height = this.$playground.height();
@@ -69,8 +72,8 @@ class AcGamePlayground {
         if (mode === 'single') {
             this.mode = 'single'
             this.state = 'fighting'
-            for (let i = 0 ; i < 15; i ++) {
-                this.players.push(new Player(this, this.vwidth  * 0.5 / this.scale, this.vheight * 0.5 / this.scale, this.height * 0.05 / this.scale, this.get_random_color(), this.height * 0.2 / this.scale, 'robot', null, null))
+            for (let i = 0 ; i < level.robot_num; i ++) {
+                this.players.push(new Player(this, this.vwidth  * 0.5 / this.scale, this.vheight * 0.5 / this.scale, this.height * 0.05 / this.scale, this.get_random_color(), (this.height * 0.2 / this.scale) * level.robot_speed, 'robot', null, null))
             }
             this.notice_board = new NoticeBoard(this, this.players.length)
 

@@ -43,10 +43,10 @@ class Player extends AcGameObject {
 
         if (this.role === 'self') {
             this.fireball_img = new Image()
-            this.fireball_img.src = "https://cdn.acwing.com/media/article/image/2021/12/02/1_9340c86053-fireball.png"
+            this.fireball_img.src = "/static/image/skill/fireball.png"
 
             this.blink_img = new Image()
-            this.blink_img.src = "https://cdn.acwing.com/media/article/image/2021/12/02/1_daccabdc53-blink.png"
+            this.blink_img.src = "/static/image/skill/blink.png"
             
             this.accelerate_img = new Image()
             this.accelerate_img.src = '/static/image/skill/accelerate.png'
@@ -226,13 +226,16 @@ class Player extends AcGameObject {
     update_move_target(e, binding_rect) {
         let tx = (e.clientX * window.devicePixelRatio - binding_rect.left ) / this.playground.scale + this.playground.cx
         let ty = (e.clientY * window.devicePixelRatio - binding_rect.top ) / this.playground.scale + this.playground.cy
-        console.log(e.clientX, binding_rect.left, this.playground.scale);
-        console.log(e.clientY, binding_rect.top, this.playground.scale);
+        // console.log(e.clientX, binding_rect.left, this.playground.scale);
+        // console.log(e.clientY, binding_rect.top, this.playground.scale);
+        // console.log('tx, ty', tx, ty);
 
         if (this.playground.mode === 'multi') {
             console.log('send move to');
             this.playground.multiplayer_socket.send_move_to(this.uuid, tx, ty)
         }
+
+        this.click_particle(5, tx, ty)
 
         this.move_to( tx, ty )
     }
@@ -260,6 +263,9 @@ class Player extends AcGameObject {
 
     attacked_by_poison() {
         if (this.poison_spent > 2) {
+            if (this.playground.mode === 'multi' && this.role === 'self') {
+                this.playground.multiplayer_socket.send_poison_attack(this.uuid, this.x, this.y, 5, 'poison')
+            }
             this.poison_spent = 0
             this.hp -= 5
             this.split_particle(10)
@@ -402,6 +408,16 @@ class Player extends AcGameObject {
     }
 
     update_robot_attack() {
+        if (this.role === 'robot' && this.playground.level.is_track && this.spent_time > 3 && Math.random() < this.playground.level.robot_speed / 300) {
+            for (let i = 0; i < this.playground.players.length; i++) {
+                let player = this.playground.players[i]
+                if (player.role === 'self' && this.get_dist(player.x, player.y) < 1) {
+                    this.shoot_fireball(player.x, player.y);
+                    console.log('attack self');
+                }
+            }
+        }
+
         // 控制电脑玩家发射火球
         if (this.role === 'robot' && this.spent_time > 3 && Math.random() < 1 / (15 * this.playground.players.length)) {
             // 随机选取玩家
@@ -430,11 +446,11 @@ class Player extends AcGameObject {
             y = Math.random() * this.playground.vheight / scale
         } while (this.check_poison_state(x, y))
         
-        if (Math.random() < 1 / (1.5 * this.playground.players.length)) {
+        if (Math.random() < this.playground.level.robot_speed / (1.5 * this.playground.players.length)) {
             for (let i = 0; i < this.playground.players.length; i++) {
                 if (this.playground.players[i].role === 'self') {
-                    x = this.playground.players[i].x 
-                    y = this.playground.players[i].y 
+                    x = this.playground.players[i].x * 0.9
+                    y = this.playground.players[i].y * 0.9
                 }
             }
         }
@@ -478,7 +494,7 @@ class Player extends AcGameObject {
                     this.update_robot_move()
                 }
             } else {
-                if (this.role === 'robot' && !this.secure && Math.random() < 1 / 50) {
+                if (this.role === 'robot' && !this.secure && Math.random() < 1 / 60) {
                     this.update_robot_move()
                 }
 
@@ -496,6 +512,21 @@ class Player extends AcGameObject {
                     this.update_skill_direct()
                 }
             }
+        }
+    }
+
+    click_particle(num, x, y) {
+        for (let i = 0; i < num; i ++ ) {
+            // 获取粒子散发的角度，速度，距离
+            // let x = this.x, y = this.y;
+            let radius = Math.max(this.radius * Math.random() * 0.2, 0.005);
+            let angle = Math.PI * 2 * Math.random();
+            let vx = Math.cos(angle), vy = Math.sin(angle);
+            let color = this.color;
+            let speed = 0.2;
+            let move_length = 0.2;
+            // 发出粒子
+            new Particle(this.playground, x, y, radius, vx, vy, color, speed, move_length);
         }
     }
 
@@ -536,7 +567,7 @@ class Player extends AcGameObject {
         this.damage_x = Math.cos(angle)
         this.damage_y = Math.sin(angle)
         this.damage_speed = damage * this.radius * 2
-        this.speed *= 1.1
+        this.speed *= 1.08
     }
 
     get_dist(tx, ty) {
@@ -565,7 +596,9 @@ class Player extends AcGameObject {
 
         this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.arc(x * scale, y * scale, r * scale, 0, Math.PI * 2, false);
+        this.ctx.strokeStyle = 'rgba(233, 171, 101, 1)'
+        this.ctx.lineWidth = 8
+        this.ctx.arc(x * scale, y * scale, r * scale * 0.85, 0, Math.PI * 2, false);
         this.ctx.stroke();
         this.ctx.clip();
         this.ctx.drawImage(this.fireball_img, (x - r) * scale, (y - r) * scale, r * 2 * scale, r * 2 * scale);
@@ -587,7 +620,9 @@ class Player extends AcGameObject {
 
         this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.arc(x * scale, y * scale, r * scale, 0, Math.PI * 2, false);
+        this.ctx.strokeStyle = 'rgba(233, 171, 101, 1)'
+        this.ctx.lineWidth = 8
+        this.ctx.arc(x * scale, y * scale, r * scale * 0.85, 0, Math.PI * 2, false);
         this.ctx.stroke();
         this.ctx.clip();
         this.ctx.drawImage(this.blink_img, (x - r) * scale, (y - r) * scale, r * 2 * scale, r * 2 * scale);
@@ -609,7 +644,9 @@ class Player extends AcGameObject {
 
         this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.arc(x * scale, y * scale, r * scale, 0, Math.PI * 2, false);
+        this.ctx.strokeStyle = 'rgba(233, 171, 101, 1)'
+        this.ctx.lineWidth = 8
+        this.ctx.arc(x * scale, y * scale, r * scale * 0.85, 0, Math.PI * 2, false);
         this.ctx.stroke();
         this.ctx.clip();
         this.ctx.drawImage(this.accelerate_img, (x - r) * scale, (y - r) * scale, r * 2 * scale, r * 2 * scale);
@@ -707,24 +744,40 @@ class Player extends AcGameObject {
         this.ctx.fillText(`E`, (x + 0.12) * scale, (y + 0.05) * scale);
     }
 
+    render_secure_notice() {
+        this.ctx.font = "20px serif";
+        this.ctx.fillStyle = "white";
+        this.ctx.textAlign = "center";
+        this.ctx.fillText(`${Math.floor(4 - this.spent_time)} 秒后开始战斗`, this.playground.width / 2, 50);
+    }
+
     last_update() {
         if (this.role === 'self' && this.playground.state === 'fighting') {
             this.render_fireball_icon()
             this.render_blink_icon()
             this.render_accelerate_icon()
             this.render_hp()
+            if (this.secure) {
+                this.render_secure_notice()
+            }
         }
     }
 
     // 渲染操作
     update() {
-        this.spent_time += this.timedelta / 1000;
-        this.poison_spent += this.timedelta / 1000;
+        if (this.playground.state === 'fighting') {
+            this.spent_time += this.timedelta / 1000;
+            this.poison_spent += this.timedelta / 1000;
+        }
 
         if (this.spent_time < 3 && this.secure) {
             this.speed = 0.5
         } else if (this.spent_time > 3 && this.secure) {
-            this.speed = 0.2
+            if (this.role === 'robot') {
+                this.speed = 0.2 * this.playground.level.robot_speed
+            } else {
+                this.speed = 0.2
+            }
             this.secure = false
         }
 

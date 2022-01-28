@@ -13,13 +13,12 @@ from channels.db import database_sync_to_async
 import json
 import threading, multiprocessing
 
+cnt = 0
 
 class MultiPlayer(AsyncWebsocketConsumer):
 
     async def connect(self):
-        print('before', self.channel_name)
         await self.accept()
-        print('after', self.channel_name)
 
     
     async def disconnect(self, close_code):
@@ -90,11 +89,13 @@ class MultiPlayer(AsyncWebsocketConsumer):
     async def attack(self, data):
         if not self.room_name:
             return
-        
         players = cache.get(self.room_name)
         for player in players:
             if player['uuid'] == data['attackee_uuid']:
-                player['hp'] -= 20
+                if data['event'] == 'poison_attack':
+                    player['hp'] -= 5
+                else:
+                    player['hp'] -= 20
                 if player['hp'] <= 0: # 防止修改血量
                     data['damage'] = 9999999
         
@@ -116,17 +117,8 @@ class MultiPlayer(AsyncWebsocketConsumer):
                 else:
                     await database_sync_to_async(db_update_player_score)(player['username'], 10)
 
-        await self.channel_layer.group_send(self.room_name, {
-            'type' : 'group_send_event',
-            'event' : 'attack',
-            'uuid' : data['uuid'],
-            'attackee_uuid' : data['attackee_uuid'],
-            'x' : data['x'],
-            'y' : data['y'],
-            'ball_uuid' : data['ball_uuid'],
-            'angle' : data['angle'],
-            'damage' : data['damage'],
-        })
+        data['type'] = 'group_send_event'
+        await self.channel_layer.group_send(self.room_name, data)
 
 
     async def blink(self, data):
@@ -176,3 +168,6 @@ class MultiPlayer(AsyncWebsocketConsumer):
             await self.message(data)
         elif data['event'] == 'accelerate':
             await self.accelerate(data)
+        elif data['event'] == 'poison_attack':
+            await self.attack(data)
+        

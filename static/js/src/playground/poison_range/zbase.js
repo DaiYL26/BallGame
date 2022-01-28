@@ -3,7 +3,7 @@ class PoisonRange extends AcGameObject {
         super()
         this.playground = playground
         this.ctx = playground.game_map.ctx
-        this.shrink = -5
+        this.shrink = -10
         this.bound_x = 0
         this.bound_y = 0
     }

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.js"
+        integrity="sha512-ZK6m9vADamSl5fxBPtXw6ho6A4TuX89HUbcfvxa2v2NYNT/7l8yFGJ3JlXyMN4hlNbz0il4k6DvqbIW5CCwqkw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.css"
+        integrity="sha512-+VDbDxc9zesADd49pfvz7CgsOl2xREI/7gnzcdyA9XjuTxLXrdpuz21VVIqc5HPfZji2CypSbxx1lgD7BgBK5g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <style>
+        .game-user-info {
+            width: 100%;
+            height: 100vh;
+            background-image: url("https://w.wallhaven.cc/full/45/wallhaven-451vm3.jpg");
+            background-size: 100% 100%;
+            user-select: none;
+        }
+        .game-user-info-wrapper {
+            width: 20%;
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .game-user-info-wrapper > img{
+            width: 20%;
+            border-radius: 50%;
+            margin-top: 5%;
+            margin-bottom: 5%;
+        }     
+        .game-user-info-wrapper-item {
+            width: 100%;
+            height: 100%;
+        }
+        .game-user-info-wrapper-item > h5{
+            color: white;
+            font-size: 16px;
+            text-align: left;
+            padding-left: 7%;
+            margin-top: 5%;
+            margin-bottom: 7%;
+        }  
+        .game-user-info-wrapper-item > input {
+            width: 90%;
+            line-height: 3vh;
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .inputFile {
+            display: none;
+        }
+        #cropImg{
+            height: 100%;
+            width: 100%;
+            box-shadow: 0 0 5px #adadad;
+        }
+    </style>
+    <title>Document</title>
+
+</head>
+
+<body style="margin: 0;">
+    <div class="game-user-info">
+        <div class="game-user-info-wrapper">
+            <img src="/static/re.png" alt="">
+            <button type="button" class="btn btn-info btn-sm" id="choice">更换头像</button>
+            <div class="game-user-info-wrapper-item">
+                <h5>用户名</h5>
+            </div>            
+            <div class="game-user-info-wrapper-item">
+                <input type="text" placeholder="用户名">
+            </div>
+            <div class="game-user-info-wrapper-item">
+                <h5>密码</h5>
+            </div>            
+            <div class="game-user-info-wrapper-item">
+                <input type="password" placeholder="密码">
+            </div>
+            <br>
+            <div class="game-user-info-wrapper-item">
+                <input type="password" placeholder="再次输入密码">
+            </div>
+            <button type="button" class="btn btn-info btn-sm">保存</button>
+            <br>
+        </div>
+    </div>
+    <input class="inputFile" type="file" accept="image/*" id="imgReader">
+    <div id="myModal" class="modal" tabindex="-1" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">选择合适的区域</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body p-0 m-2">
+                <img id="cropImg">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+              <button type="button" class="btn btn-primary" id="avatar_save">确定</button>
+            </div>
+          </div>
+        </div>
+    </div>
+</body>
+<script>
+    $(function () {
+        let CROPPER
+
+        $('#imgReader').change(function loadingImg(eve) {
+            $('#myModal').modal('show')
+
+            let reader = new FileReader();
+            if (event.target.files[0]) {
+                reader.readAsDataURL(eve.target.files[0]);
+                reader.onload = (e) => {
+                    let dataURL = reader.result;
+                    document.querySelector('#cropImg').src = dataURL;
+                    const image = document.getElementById('cropImg');
+                    if (CROPPER) {
+                        CROPPER.destroy()
+                    }
+                    CROPPER = new Cropper(image, {
+                        aspectRatio: 1 / 1,
+                        viewMode: 1,
+                        minContainerWidth: 300,
+                        minContainerHeight: 300,
+                        dragMode: 'move',
+                    })
+                }
+            }
+        })
+        
+
+        $('#choice').click(function () {
+            $('#imgReader').click()
+        })
+
+        $('#avatar_save').click(function GetData(){
+            //getCroppedCanvas方法可以将裁剪区域的数据转换成canvas数据
+              CROPPER.getCroppedCanvas({
+                    maxWidth: 4096,
+                    maxHeight: 4096,
+                    fillColor: '#fff',
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'low',
+                }).toBlob((blob) => {                    
+                    let reader = new FileReader()
+                    reader.readAsDataURL(blob)
+                    reader.onload = (e) => {
+                        console.log(e.target.result)
+                        /*$.post('https://app122.acapp.acwing.com.cn/settings/change/avatar/', {
+                            'img' : e.target.result
+                        }, function (e) {
+                            console.log(e)
+                        })*/
+                    }
+                })
+        })
+    })
+</script>
+
+</html>

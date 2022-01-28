@@ -30,6 +30,10 @@ class AcGameMenu {
         this.$settings = this.$menu.find('.ac-game-menu-field-item-settings')
         this.$logout = this.$menu.find('.ac-game-menu-field-item-logout')
 
+        this.choice = new LevelChoice(this)
+
+        this.personalize = new Personalize(this)
+
         this.start()
     }
 
@@ -42,8 +46,9 @@ class AcGameMenu {
         let outer = this
 
         this.$single_mode.click(function () {
-           outer.hide()
-           outer.root.playground.show('single')
+            outer.hide()
+            // outer.root.playground.show('single')
+            outer.choice.show()
         });
         this.$multi_mode.click(function () {
             console.log("click multi_mode")
@@ -52,6 +57,9 @@ class AcGameMenu {
         })
         this.$settings.click(function () {
             console.log("click settings")
+            outer.hide()
+            outer.personalize.show()
+            console.log(outer.personalize);
         })
         this.$logout.click(function () {
             $.get('https://app122.acapp.acwing.com.cn/settings/logout/').then(res => {
