@@ -5,7 +5,7 @@ body {
 .ac-game-settings {
     width: 100%;
     height: 100%;
-    background-image: url("https://w.wallhaven.cc/full/45/wallhaven-451vm3.jpg");
+    background-image: url("/static/image/background.jpg");
     background-size: 100% 100%;
     user-select: none;
 }
@@ -125,7 +125,7 @@ body {
     width: 100%;
     height: 100%;
     background-color: black;
-    background-image: url('https://w.wallhaven.cc/full/45/wallhaven-451vm3.jpg');
+    background-image: url('/static/image/background.jpg');
     background-size: 100% 100%;
     user-select: none;
     display: flex;
@@ -209,8 +209,8 @@ body {
 
 .game-user-info {
     width: 100%;
-    height: 100vh;
-    background-image: url("https://w.wallhaven.cc/full/45/wallhaven-451vm3.jpg");
+    height: 100%;
+    background-image: url("/static/image/background.jpg");
     background-size: 100% 100%;
     user-select: none;
 }

@@ -209,7 +209,7 @@ body {
 
 .game-user-info {
     width: 100%;
-    height: 100vh;
+    height: 100%;
     background-image: url("https://w.wallhaven.cc/full/45/wallhaven-451vm3.jpg");
     background-size: 100% 100%;
     user-select: none;

@@ -1,4 +1,3 @@
-from unicodedata import name
 from django.urls import path, include
 from game.views.settings.getinfo import get_user_info
 from game.views.settings.login import signin

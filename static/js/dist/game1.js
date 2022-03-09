@@ -2218,13 +2218,6 @@ class Settings {
             注册
         </div>
         <br>
-        <div class="ac-game-settings-acwing">
-            <img width="30" src="https://app165.acapp.acwing.com.cn/static/image/settings/acwing_logo.png">
-            <br>
-            <div>
-                AcWing一键登录
-            </div>
-        </div>
     </div>
     <div class="ac-game-settings-register">
         <div class="ac-game-settings-title">

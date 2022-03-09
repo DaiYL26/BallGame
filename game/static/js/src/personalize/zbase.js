@@ -180,6 +180,7 @@ class Personalize {
                         if (e.result === 'success') {
                             console.log(e.url);
                             outer.$avatar.attr("src", e.url);
+                            outer.menu.root.settings.photo = e.url
                             $('#myModal').modal('hide')
                         }
                     })

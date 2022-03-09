@@ -1,5 +1,5 @@
 from django.urls import path, include
-from game.views.index import index, info
+from game.views.index import index
 
 
 urlpatterns = [

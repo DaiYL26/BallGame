@@ -41,7 +41,7 @@ class LevelChoice {
         let outer = this
 
         this.$easy.click(function () {
-            console.log('easy');
+             ;
             let easy = {
                 level: 1,
                 robot_num: 15,
@@ -52,7 +52,7 @@ class LevelChoice {
         })
 
         this.$difficult.click(function () {
-            console.log('difficult');
+             ;
             let difficult = {
                 level: 2,
                 robot_num: 24,
@@ -63,7 +63,7 @@ class LevelChoice {
         })
 
         this.$hell.click(function () {
-            console.log('hell');
+             ;
             let hell = {
                 level: 2,
                 robot_num: 29,
@@ -74,7 +74,7 @@ class LevelChoice {
         })
 
         this.$back.click(function () {
-            console.log('back');
+             ;
             outer.hide()
             outer.menu.show()
         })
@@ -142,15 +142,15 @@ class LevelChoice {
             outer.choice.show()
         });
         this.$multi_mode.click(function () {
-            console.log("click multi_mode")
+             
             outer.hide()
             outer.root.playground.show('multi')
         })
         this.$settings.click(function () {
-            console.log("click settings")
+             
             outer.hide()
             outer.personalize.show()
-            console.log(outer.personalize);
+             ;
         })
         this.$logout.click(function () {
             $.get('https://app122.acapp.acwing.com.cn/settings/logout/').then(res => {
@@ -272,17 +272,17 @@ class Personalize {
     add_listening_update_pwd() {
         let outer = this
         this.$update_pwd.click(function () {
-            console.log('update_pwd');
+             ;
             if (!outer.update_pwd) {
                 outer.$update_pwd.text('收起')
                 outer.update_pwd = true
                 outer.$pwd_field.fadeIn()
-                console.log('update_pwd', 'false');
+                 ;
             } else {
                 outer.$update_pwd.text('修改密码')
                 outer.update_pwd = false
                 outer.$pwd_field.fadeOut()
-                console.log('update_pwd', 'true');
+                 ;
             }
         })
     }
@@ -290,7 +290,7 @@ class Personalize {
     add_listening_back() {
         let outer = this
         $('.game-user-info-wrapper-back').click(function () {
-            console.log('user-info-back');
+             ;
             outer.hide()
             outer.menu.show()
         })
@@ -344,12 +344,12 @@ class Personalize {
                 let reader = new FileReader()
                 reader.readAsDataURL(blob)
                 reader.onload = (e) => {
-                    console.log(e.target.result)
+                     
                     $.post('https://app122.acapp.acwing.com.cn/settings/change/avatar/', {
                         'img': e.target.result
                     }, function (e) {
                         if (e.result === 'success') {
-                            console.log(e.url);
+                             ;
                             outer.$avatar.attr("src", e.url);
                             outer.menu.root.settings.photo = e.url
                             $('#myModal').modal('hide')
@@ -398,7 +398,7 @@ class Personalize {
 
     verfiy_username() {
         let username = this.$username.val()
-        console.log(username);
+         ;
         if (username) {
             return username
         }
@@ -409,7 +409,7 @@ class Personalize {
         let pwd_old = this.$pwd_old.val()
         let pwd_first = this.$pwd_first.val()
         let pwd_second = this.$pwd_second.val()
-        console.log(pwd_first, pwd_second);
+         ;
         if (pwd_old && pwd_first && pwd_first === pwd_second) {
             return pwd_first
         }
@@ -513,9 +513,9 @@ class ChatField {
         let outer = this
 
         this.$input.keydown(function (e) {
-            console.log(e.which);
+             ;
             if (e.which === 27) { // ESC
-                console.log('esc');
+                 ;
                 outer.hide_input()
                 return false
             } else if (e.which === 13) {
@@ -614,8 +614,8 @@ class ChatField {
             this.decorate_y.push(y)
         }
 
-        console.log(this.decorate_x);
-        console.log(this.decorate_y);
+         ;
+         ;
     }
 
     resize() {
@@ -627,7 +627,7 @@ class ChatField {
     }
 
     update() {
-        // console.log('Map update');
+        //  ;
         this.render()
     }
 
@@ -927,11 +927,11 @@ class MiniMap extends AcGameObject {
             if (outer.playground.mode === 'multi') {
                 if (e.which === 13) { // enter
                     outer.playground.chat_field.show_input()
-                    console.log('enter');
+                     ;
                     return false
                 } else if (e.which === 27) { // esc
                     outer.playground.chat_field.hide_input()
-                    console.log('esc');
+                     ;
                     return false
                 }
             }
@@ -992,12 +992,12 @@ class MiniMap extends AcGameObject {
     update_move_target(e, binding_rect) {
         let tx = (e.clientX * window.devicePixelRatio - binding_rect.left ) / this.playground.scale + this.playground.cx
         let ty = (e.clientY * window.devicePixelRatio - binding_rect.top ) / this.playground.scale + this.playground.cy
-        // console.log(e.clientX, binding_rect.left, this.playground.scale);
-        // console.log(e.clientY, binding_rect.top, this.playground.scale);
-        // console.log('tx, ty', tx, ty);
+        //  ;
+        //  ;
+        //  ;
 
         if (this.playground.mode === 'multi') {
-            console.log('send move to');
+             ;
             this.playground.multiplayer_socket.send_move_to(this.uuid, tx, ty)
         }
 
@@ -1112,7 +1112,7 @@ class MiniMap extends AcGameObject {
         if (ty - this.radius < 0) {
             ty = this.radius
         }
-        console.log('blink', tx, ty);
+         ;
         this.x = tx
         this.y = ty
     }
@@ -1127,7 +1127,7 @@ class MiniMap extends AcGameObject {
                 }
                 this.playground.players.splice(i, 1)
                 if (player.role === 'self') {
-                    console.log('unbinding ...');
+                     ;
                     this.unbind_listening_events()
                     if (this.playground.state === 'fighting') {
                         this.playground.score_board.lose()
@@ -1147,7 +1147,7 @@ class MiniMap extends AcGameObject {
             if (fireball.uuid === uuid) {
                 this.fireballs.splice(i, 1)
                 fireball.destroy()
-                console.log('fireball destory');
+                 ;
                 break;
             }
         }
@@ -1179,7 +1179,7 @@ class MiniMap extends AcGameObject {
                 let player = this.playground.players[i]
                 if (player.role === 'self' && this.get_dist(player.x, player.y) < 1) {
                     this.shoot_fireball(player.x, player.y);
-                    console.log('attack self');
+                     ;
                 }
             }
         }
@@ -1351,9 +1351,9 @@ class MiniMap extends AcGameObject {
         this.vy = Math.sin(angle)
         this.direct_x = this.vx
         this.direct_y = this.vy
-        // console.log(tx, ty);
-        // console.log(this.playground.cx, this.playground.cy);
-        // console.log(this.x, this.y);
+        //  ;
+        //  ;
+        //  ;
     }
 
     render_fireball_icon() {
@@ -1627,7 +1627,7 @@ class MiniMap extends AcGameObject {
     }
 
     start() {
-        console.log('score board start');
+         ;
     }
 
     win() {
@@ -1850,7 +1850,7 @@ class MiniMap extends AcGameObject {
 
     on_open() {
         let outer = this
-        console.log(this.uuid, outer.uuid);
+         ;
         this.ws.onopen = function () {
             outer.send_create_player(outer.uuid, outer.playground.root.settings.username, outer.playground.root.settings.photo)    
         }        
@@ -1866,26 +1866,26 @@ class MiniMap extends AcGameObject {
                 return false
             
             let event = data.event
-            console.log(data);
+             ;
             if (event === 'create_player') {
-                console.log(data);
+                 ;
                 outer.receive_create_player(uuid, data.username, data.photo)
             } else if (event === 'move_to') {
                 outer.receive_move_to(uuid, data.tx, data.ty)
             } else if (event === 'shoot_fireball') {
-                console.log('event shhot_fireball');
+                 ;
                 outer.receive_shoot_fireball(uuid, data.tx, data.ty, data.ball_uuid)
             } else if (event === 'attack') {
-                console.log(data);
+                 ;
                 outer.receive_attack(uuid, data.attackee_uuid, data.x, data.y, data.angle, data.damage, data.ball_uuid)
             } else if (event === 'blink') {
-                console.log('receive blink');
+                 ;
                 outer.receive_blink(uuid, data.x, data.y, data.vx, data.vy)
             } else if (event === 'message') {
-                console.log('receive message');
+                 ;
                 outer.receive_message(data.username, data.text)
             } else if (event === 'accelerate') {
-                console.log('accelerate');
+                 ;
                 outer.receive_accelerate(uuid)
             } else if (event === 'poison_attack') {
                 outer.receive_poison_attack(data.attackee_uuid, data.x, data.y, data.damage)
@@ -2015,7 +2015,7 @@ class MiniMap extends AcGameObject {
     }
 
     receive_shoot_fireball(uuid, tx, ty, ball_uuid) {
-        console.log(uuid, tx, ty, ball_uuid);
+         ;
         let player = this.get_player(uuid)
         if (player) {
             let fireball = player.shoot_fireball(tx, ty)
@@ -2043,7 +2043,6 @@ class MiniMap extends AcGameObject {
     send_create_player(uuid, username, photo) {
         let player = { 'event': 'create_player', 'uuid': uuid, 'username': username, 'photo': photo }
         this.ws.send(JSON.stringify(player))
-        console.log(JSON.stringify(player));
     }
 
     receive_create_player(uuid, username, photo) {
@@ -2218,13 +2217,6 @@ class Settings {
             注册
         </div>
         <br>
-        <div class="ac-game-settings-acwing">
-            <img width="30" src="https://app165.acapp.acwing.com.cn/static/image/settings/acwing_logo.png">
-            <br>
-            <div>
-                AcWing一键登录
-            </div>
-        </div>
     </div>
     <div class="ac-game-settings-register">
         <div class="ac-game-settings-title">
@@ -2303,10 +2295,10 @@ class Settings {
 
     acapp_login(appid, redirect_uri, scope, state) {
         let outer = this;
-        // // console.log(appid, redirect_uri, scope, state);
+        // //  ;
         this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function(resp) {
-            // // console.log("called from acapp_login function");
-            // // console.log(resp);
+            // //  ;
+            // //  ;
             if (resp.result === "success") {
                 outer.username = resp.username;
                 outer.photo = resp.photo;
@@ -2365,12 +2357,12 @@ class Settings {
     }
 
     acwing_login() {
-        // // console.log('click icon');
+        // //  ;
         $.ajax({
             url: '/settings/acwing/web/apply_code/',
             type: 'GET',
             success: (resp) => {
-                // // console.log(resp);
+                // //  ;
                 $(location).attr('href', resp.apply_code_url);
             }
         })
@@ -2392,7 +2384,7 @@ class Settings {
                 password_confirm: password_confirm
             },
             success: function(resp) {
-                // console.log(resp);
+                //  ;
                 if (resp.result === "success") {
                     location.reload();
                 } else {
@@ -2417,7 +2409,7 @@ class Settings {
                 password: password,
             },
             success: function(resp) {
-                // console.log(resp);
+                //  ;
                 if (resp.result === "success") {
                     location.reload();
                 } else {
@@ -2447,7 +2439,7 @@ class Settings {
                 platform: outer.platform
             },
             success: (resp) => {
-                // console.log(resp)
+                //  
                 if (resp.result === 'success') {
                     outer.username = resp.username
                     outer.photo = resp.photo
