@@ -62,7 +62,7 @@ class AcGameMenu {
             console.log(outer.personalize);
         })
         this.$logout.click(function () {
-            $.get('https://app122.acapp.acwing.com.cn/settings/logout/').then(res => {
+            $.get('/settings/logout/').then(res => {
                 if (res.result === 'success') {
                     $(location).attr('href', '/')
                 }

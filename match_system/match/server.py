@@ -19,7 +19,6 @@ from match_system.match.match_service import Match
 from queue import Queue
 from time import sleep
 from threading import Thread
-from functools import reduce
 import heapq
 
 queue = Queue()
@@ -35,6 +34,9 @@ class Player:
 
     def __lt__(self, other):
         return self.score < other.score
+    
+    def __str__(self) -> str:
+        return self.username
 
 
 class Pool:
@@ -44,6 +46,15 @@ class Pool:
 
     def add_player(self, player: Player) -> None:
         heapq.heappush(self.__players, player)
+
+    def del_player(self, player: Player) -> None:
+        try:
+            for p in self.__players:
+                if p.username == player.username:
+                    self.__players.remove(p)
+                    break
+        except:
+            print('No player : ', player)
 
 
     def check_match(self, selects: List) -> bool:
@@ -116,6 +127,7 @@ class CalculatorHandler:
 
     def add_player(self, score: int, uuid: str, username: str, photo: str, channel_name: str) -> int:
         player = Player(score, uuid, username, photo, channel_name)
+        
         queue.put(player)
         return 0
 
@@ -132,6 +144,10 @@ def worker() -> None:
     while True:
         player = get_player_from_queue()
         if player:
+            if player.uuid == '-999':
+                pool.del_player(player=player)
+                continue
+
             pool.add_player(player=player)
             print("Add Player: %s %d" % (player.username, player.score))
         else:

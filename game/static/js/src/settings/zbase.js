@@ -38,11 +38,9 @@ class Settings {
         </div>
         <br>
         <div class="ac-game-settings-acwing">
-            <img width="30" src="https://app165.acapp.acwing.com.cn/static/image/settings/acwing_logo.png">
+            <img width="30" src="https://github.githubassets.com/favicons/favicon.png">
+            <div>github登录</div>
             <br>
-            <div>
-                AcWing一键登录
-            </div>
         </div>
     </div>
     <div class="ac-game-settings-register">
@@ -76,11 +74,9 @@ class Settings {
         </div>
         <br>
         <div class="ac-game-settings-acwing">
-            <img width="30" src="https://app165.acapp.acwing.com.cn/static/image/settings/acwing_logo.png">
+            <img width="30" src="https://github.githubassets.com/favicons/favicon.png">
+            <div>github登录</div>
             <br>
-            <div>
-                AcWing一键登录
-            </div>
         </div>
     </div>
 </div>
@@ -123,7 +119,7 @@ class Settings {
     acapp_login(appid, redirect_uri, scope, state) {
         let outer = this;
         // // console.log(appid, redirect_uri, scope, state);
-        this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function(resp) {
+        this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function (resp) {
             // // console.log("called from acapp_login function");
             // // console.log(resp);
             if (resp.result === "success") {
@@ -142,7 +138,7 @@ class Settings {
         $.ajax({
             url: "/settings/acwing/acapp/apply_code/",
             type: "GET",
-            success: function(resp) {
+            success: function (resp) {
                 if (resp.result === "success") {
                     outer.acapp_login(resp.appid, resp.redirect_uri, resp.scope, resp.state);
                 }
@@ -160,7 +156,7 @@ class Settings {
         let outer = this
         this.$acwing_login.click(function () {
             outer.acwing_login()
-        })        
+        })
     }
 
     add_listening_events_login() {
@@ -170,12 +166,12 @@ class Settings {
         });
         this.$login_submit.click(function () {
             outer.login_on_remote()
-        })    
+        })
     }
 
     add_listening_events_register() {
         let outer = this;
-        this.$register_login.click(function() {
+        this.$register_login.click(function () {
             outer.login();
         });
         this.$register_submit.click(function () {
@@ -210,7 +206,7 @@ class Settings {
                 password: password,
                 password_confirm: password_confirm
             },
-            success: function(resp) {
+            success: function (resp) {
                 // console.log(resp);
                 if (resp.result === "success") {
                     location.reload();
@@ -235,7 +231,7 @@ class Settings {
                 username: username,
                 password: password,
             },
-            success: function(resp) {
+            success: function (resp) {
                 // console.log(resp);
                 if (resp.result === "success") {
                     location.reload();

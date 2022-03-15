@@ -153,7 +153,7 @@ class LevelChoice {
             console.log(outer.personalize);
         })
         this.$logout.click(function () {
-            $.get('https://app122.acapp.acwing.com.cn/settings/logout/').then(res => {
+            $.get('/settings/logout/').then(res => {
                 if (res.result === 'success') {
                     $(location).attr('href', '/')
                 }
@@ -502,7 +502,7 @@ class ChatField {
         this.playground.$playground.append(this.$history);
         this.playground.$playground.append(this.$input);
 
-        this.start() 
+        this.start()
     }
 
     start() {
@@ -515,7 +515,6 @@ class ChatField {
         this.$input.keydown(function (e) {
             console.log(e.which);
             if (e.which === 27) { // ESC
-                console.log('esc');
                 outer.hide_input()
                 return false
             } else if (e.which === 13) {
@@ -555,7 +554,7 @@ class ChatField {
             }, 3000)
         }
     }
-    
+
     show_history() {
         this.$history.fadeIn()
     }
@@ -813,14 +812,14 @@ class MiniMap extends AcGameObject {
 
             this.blink_img = new Image()
             this.blink_img.src = "/static/image/skill/blink.png"
-            
+
             this.accelerate_img = new Image()
             this.accelerate_img.src = '/static/image/skill/accelerate.png'
         }
         this.accelerate_coldtime = 0
         this.blink_coldtime = 0
         this.fireball_coldtime = 0
-        
+
         this.poison_spent = 2
 
         this.secure = true
@@ -845,7 +844,7 @@ class MiniMap extends AcGameObject {
             let y = Math.random() * this.playground.vheight / scale
             this.move_to(x, y)
         }
-        
+
     }
 
     add_listening_events() {
@@ -863,7 +862,7 @@ class MiniMap extends AcGameObject {
         let outer = this
         //鼠标移动事件
         this.playground.game_map.$canvas.mousemove(function (e) {
-            if (outer.role !== 'self') 
+            if (outer.role !== 'self')
                 return false
 
             const binding_rect = outer.ctx.canvas.getBoundingClientRect()
@@ -883,7 +882,7 @@ class MiniMap extends AcGameObject {
             this.playground.chat_field.$history.mousedown(function (e) {
                 if (outer.playground.state !== 'fighting')
                     return false
-        
+
                 const binding_rect = outer.ctx.canvas.getBoundingClientRect()
                 // 移动
                 if (e.which === 3) {
@@ -896,24 +895,24 @@ class MiniMap extends AcGameObject {
         this.playground.game_map.$canvas.mousedown(function (e) {
             if (outer.playground.state !== 'fighting')
                 return false
-                
+
             const binding_rect = outer.ctx.canvas.getBoundingClientRect()
             // 移动
-            if (e.which  === 3) {
+            if (e.which === 3) {
                 outer.update_move_target(e, binding_rect)
                 // if ()
                 // outer.playground.chat_field.hide_input()
             } else if (e.which == 1) {  //发技能
-                let tx = (e.clientX * window.devicePixelRatio - binding_rect.left ) / outer.playground.scale + outer.playground.cx
-                let ty = (e.clientY * window.devicePixelRatio - binding_rect.top ) / outer.playground.scale + outer.playground.cy
+                let tx = (e.clientX * window.devicePixelRatio - binding_rect.left) / outer.playground.scale + outer.playground.cx
+                let ty = (e.clientY * window.devicePixelRatio - binding_rect.top) / outer.playground.scale + outer.playground.cy
                 if (outer.cur_skill === 'fireball') {
-                    let fireball = outer.shoot_fireball( tx, ty )
+                    let fireball = outer.shoot_fireball(tx, ty)
                     if (outer.playground.mode === 'multi') {
                         outer.playground.multiplayer_socket.send_shoot_fireball(tx, ty, fireball.uuid)
                     }
                     outer.fireball_coldtime = 1.5
                 }
-                
+
                 outer.cur_skill = null
             }
         })
@@ -930,7 +929,13 @@ class MiniMap extends AcGameObject {
                     console.log('enter');
                     return false
                 } else if (e.which === 27) { // esc
-                    outer.playground.chat_field.hide_input()
+                    if (outer.playground.state != 'fighting') {
+                        outer.playground.multiplayer_socket.ws.close()
+                        outer.playground.hide();
+                        outer.playground.root.menu.show();
+                    } else {
+                        outer.playground.chat_field.hide_input()
+                    }
                     console.log('esc');
                     return false
                 }
@@ -938,11 +943,11 @@ class MiniMap extends AcGameObject {
 
             if (outer.playground.state !== 'fighting')
                 return false
-            
+
             if (e.which === 81) {
                 if (outer.fireball_coldtime > outer.eps || outer.spent_time < 3)
                     return false;
-                
+
                 outer.cur_skill = 'fireball'
                 // outer.fireball_coldtime = 3
                 // let fireball = outer.shoot_fireball_moblie( outer.direct_x, outer.direct_y )
@@ -990,8 +995,8 @@ class MiniMap extends AcGameObject {
 
     // 更新移动目的地
     update_move_target(e, binding_rect) {
-        let tx = (e.clientX * window.devicePixelRatio - binding_rect.left ) / this.playground.scale + this.playground.cx
-        let ty = (e.clientY * window.devicePixelRatio - binding_rect.top ) / this.playground.scale + this.playground.cy
+        let tx = (e.clientX * window.devicePixelRatio - binding_rect.left) / this.playground.scale + this.playground.cx
+        let ty = (e.clientY * window.devicePixelRatio - binding_rect.top) / this.playground.scale + this.playground.cy
         // console.log(e.clientX, binding_rect.left, this.playground.scale);
         // console.log(e.clientY, binding_rect.top, this.playground.scale);
         // console.log('tx, ty', tx, ty);
@@ -1003,7 +1008,7 @@ class MiniMap extends AcGameObject {
 
         this.click_particle(5, tx, ty)
 
-        this.move_to( tx, ty )
+        this.move_to(tx, ty)
     }
 
     update_skill_direct() {
@@ -1050,7 +1055,7 @@ class MiniMap extends AcGameObject {
         let vx = Math.cos(angle)    // x方向上的单位速度
         let vy = Math.sin(angle)    // y方向上的单位速度
         let color = 'orange'        // 火球颜色
-        let speed =  this.speed * 3    // 火球速度
+        let speed = this.speed * 3    // 火球速度
         let move_length = 1    //火球的发射距离
         // 发射火球
         let fire_ball = new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, 20)
@@ -1068,7 +1073,7 @@ class MiniMap extends AcGameObject {
         // let vx = Math.cos(angle)    // x方向上的单位速度
         // let vy = Math.sin(angle)    // y方向上的单位速度
         let color = 'orange'        // 火球颜色
-        let speed =  this.speed * 3    // 火球速度
+        let speed = this.speed * 3    // 火球速度
         let move_length = 1    //火球的发射距离
         // 发射火球
         let fire_ball = new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, 20)
@@ -1079,7 +1084,7 @@ class MiniMap extends AcGameObject {
     }
 
     start_accelerate() {
-        
+
         this.accelerate = new Accelerate(this.playground, this)
         this.speed *= 2
         this.accelerate_coldtime = 7
@@ -1098,7 +1103,7 @@ class MiniMap extends AcGameObject {
 
         let tx = x + vx * 0.3
         let ty = y + vy * 0.3
-        
+
         if (tx + this.radius > this.playground.vwidth / scale) {
             tx = this.playground.vwidth / scale - this.radius
         }
@@ -1119,7 +1124,7 @@ class MiniMap extends AcGameObject {
 
     // 玩家消失时
     on_destroy() {
-        for (let i = 0; i < this.playground.players.length; i ++) {
+        for (let i = 0; i < this.playground.players.length; i++) {
             let player = this.playground.players[i]
             if (player === this) {
                 if (this.accelerate) {
@@ -1140,7 +1145,7 @@ class MiniMap extends AcGameObject {
             this.playground.score_board.win()
         }
     }
-    
+
     destroy_fireball(uuid) {
         for (let i = 0; i < this.fireballs.length; i++) {
             let fireball = this.fireballs[i]
@@ -1211,7 +1216,7 @@ class MiniMap extends AcGameObject {
             x = Math.random() * this.playground.vwidth / scale
             y = Math.random() * this.playground.vheight / scale
         } while (this.check_poison_state(x, y))
-        
+
         if (Math.random() < this.playground.level.robot_speed / (1.5 * this.playground.players.length)) {
             for (let i = 0; i < this.playground.players.length; i++) {
                 if (this.playground.players[i].role === 'self') {
@@ -1233,7 +1238,7 @@ class MiniMap extends AcGameObject {
         let my = this.damage_y * this.damage_speed * this.timedelta / 1000
         //越界判断，不能被弹出界
         if (this.x + mx > this.radius && this.x + mx + this.radius < this.playground.vwidth / scale) {
-            this.x += mx 
+            this.x += mx
         }
         if (this.y + my > this.radius && this.y + my + this.radius < this.playground.vheight / scale) {
             this.y += my
@@ -1241,7 +1246,7 @@ class MiniMap extends AcGameObject {
         this.damage_speed *= this.friction
     }
 
-    update_move() {        
+    update_move() {
         let scale = this.playground.scale
 
         this.update_robot_attack()
@@ -1282,7 +1287,7 @@ class MiniMap extends AcGameObject {
     }
 
     click_particle(num, x, y) {
-        for (let i = 0; i < num; i ++ ) {
+        for (let i = 0; i < num; i++) {
             // 获取粒子散发的角度，速度，距离
             // let x = this.x, y = this.y;
             let radius = Math.max(this.radius * Math.random() * 0.2, 0.005);
@@ -1297,7 +1302,7 @@ class MiniMap extends AcGameObject {
     }
 
     split_particle(num) {
-        for (let i = 0; i < num + Math.random() * 10; i ++ ) {
+        for (let i = 0; i < num + Math.random() * 10; i++) {
             // 获取粒子散发的角度，速度，距离
             let x = this.x, y = this.y;
             let radius = this.radius * Math.random() * 0.2;
@@ -1462,11 +1467,11 @@ class MiniMap extends AcGameObject {
 
     render_skill_direct(scale) {
         let ctx_x = this.x - this.playground.cx, ctx_y = this.y - this.playground.cy;
-        let dx = ctx_x + this.skill_direct_x 
+        let dx = ctx_x + this.skill_direct_x
         let dy = ctx_y + this.skill_direct_y
         this.ctx.lineWidth = 8
         this.ctx.moveTo(ctx_x * scale, ctx_y * scale)
-        this.ctx.lineTo(dx * scale , dy * scale )
+        this.ctx.lineTo(dx * scale, dy * scale)
         this.ctx.stroke()
         this.ctx.lineWidth = 2
     }
@@ -1554,7 +1559,7 @@ class MiniMap extends AcGameObject {
         if (this.role === 'self')
             this.playground.re_calculate_cx_cy(this.x, this.y);
         this.update_coldtime()
-        this.update_move()    
+        this.update_move()
         this.render()
     }
 }class PoisonRange extends AcGameObject {
@@ -1835,7 +1840,7 @@ class MiniMap extends AcGameObject {
     constructor(playground, uuid) {
         this.playground = playground
         this.uuid = uuid
-        this.ws = new WebSocket("wss://app122.acapp.acwing.com.cn/wss/multiplayer/")
+        this.ws = new WebSocket("ws://120.77.222.189/wss/multiplayer/")
         this.start()
     }
 
@@ -1848,12 +1853,20 @@ class MiniMap extends AcGameObject {
         this.on_receive()
     }
 
+    on_close() {
+        let outer = this
+        console.log('on close')
+        this.ws.onclose = function () {
+            outer.send_create_player(-999, outer.playground.root.settings.username, outer.playground.root.settings.photo)
+        }
+    }
+
     on_open() {
         let outer = this
         console.log(this.uuid, outer.uuid);
         this.ws.onopen = function () {
-            outer.send_create_player(outer.uuid, outer.playground.root.settings.username, outer.playground.root.settings.photo)    
-        }        
+            outer.send_create_player(outer.uuid, outer.playground.root.settings.username, outer.playground.root.settings.photo)
+        }
     }
 
     on_receive() {
@@ -1864,7 +1877,7 @@ class MiniMap extends AcGameObject {
 
             if (uuid === outer.uuid)
                 return false
-            
+
             let event = data.event
             console.log(data);
             if (event === 'create_player') {
@@ -1913,7 +1926,7 @@ class MiniMap extends AcGameObject {
             'x': x,
             'y': y,
             'damage': damage,
-            'type' : type
+            'type': type
         }))
     }
 
@@ -1950,7 +1963,7 @@ class MiniMap extends AcGameObject {
             'event': 'message',
             'uuid': outer.uuid,
             'username': username,
-            'text' : text
+            'text': text
         }))
     }
 
@@ -1989,7 +2002,7 @@ class MiniMap extends AcGameObject {
             'angle': angle,
             'damage': damage,
             'ball_uuid': ball_uuid,
-            'type' : type
+            'type': type
         }))
     }
 
@@ -2010,7 +2023,7 @@ class MiniMap extends AcGameObject {
             'tx': tx,
             'ty': ty,
             'ball_uuid': ball_uuid,
-            'type' : type
+            'type': type
         }))
     }
 
@@ -2036,7 +2049,7 @@ class MiniMap extends AcGameObject {
             'event': 'move_to',
             'uuid': uuid,
             'tx': tx,
-            'ty' : ty
+            'ty': ty
         }))
     }
 
@@ -2219,11 +2232,9 @@ class Settings {
         </div>
         <br>
         <div class="ac-game-settings-acwing">
-            <img width="30" src="https://app165.acapp.acwing.com.cn/static/image/settings/acwing_logo.png">
+            <img width="30" src="https://github.githubassets.com/favicons/favicon.png">
+            <div>github登录</div>
             <br>
-            <div>
-                AcWing一键登录
-            </div>
         </div>
     </div>
     <div class="ac-game-settings-register">
@@ -2257,11 +2268,9 @@ class Settings {
         </div>
         <br>
         <div class="ac-game-settings-acwing">
-            <img width="30" src="https://app165.acapp.acwing.com.cn/static/image/settings/acwing_logo.png">
+            <img width="30" src="https://github.githubassets.com/favicons/favicon.png">
+            <div>github登录</div>
             <br>
-            <div>
-                AcWing一键登录
-            </div>
         </div>
     </div>
 </div>
@@ -2304,7 +2313,7 @@ class Settings {
     acapp_login(appid, redirect_uri, scope, state) {
         let outer = this;
         // // console.log(appid, redirect_uri, scope, state);
-        this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function(resp) {
+        this.root.AcWingOS.api.oauth2.authorize(appid, redirect_uri, scope, state, function (resp) {
             // // console.log("called from acapp_login function");
             // // console.log(resp);
             if (resp.result === "success") {
@@ -2323,7 +2332,7 @@ class Settings {
         $.ajax({
             url: "/settings/acwing/acapp/apply_code/",
             type: "GET",
-            success: function(resp) {
+            success: function (resp) {
                 if (resp.result === "success") {
                     outer.acapp_login(resp.appid, resp.redirect_uri, resp.scope, resp.state);
                 }
@@ -2341,7 +2350,7 @@ class Settings {
         let outer = this
         this.$acwing_login.click(function () {
             outer.acwing_login()
-        })        
+        })
     }
 
     add_listening_events_login() {
@@ -2351,12 +2360,12 @@ class Settings {
         });
         this.$login_submit.click(function () {
             outer.login_on_remote()
-        })    
+        })
     }
 
     add_listening_events_register() {
         let outer = this;
-        this.$register_login.click(function() {
+        this.$register_login.click(function () {
             outer.login();
         });
         this.$register_submit.click(function () {
@@ -2391,7 +2400,7 @@ class Settings {
                 password: password,
                 password_confirm: password_confirm
             },
-            success: function(resp) {
+            success: function (resp) {
                 // console.log(resp);
                 if (resp.result === "success") {
                     location.reload();
@@ -2416,7 +2425,7 @@ class Settings {
                 username: username,
                 password: password,
             },
-            success: function(resp) {
+            success: function (resp) {
                 // console.log(resp);
                 if (resp.result === "success") {
                     location.reload();

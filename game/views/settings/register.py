@@ -14,7 +14,7 @@ def register(request):
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
     password_confirm = data.get('password_confirm', '').strip()
-
+    print('call register')
     if username == '' or password == '' or len(password) < 8 or len(password) > 18:
         return JsonResponse({
             'result' : 'failed',

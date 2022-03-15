@@ -14,7 +14,7 @@ class ChatField {
         this.playground.$playground.append(this.$history);
         this.playground.$playground.append(this.$input);
 
-        this.start() 
+        this.start()
     }
 
     start() {
@@ -27,7 +27,6 @@ class ChatField {
         this.$input.keydown(function (e) {
             console.log(e.which);
             if (e.which === 27) { // ESC
-                console.log('esc');
                 outer.hide_input()
                 return false
             } else if (e.which === 13) {
@@ -67,7 +66,7 @@ class ChatField {
             }, 3000)
         }
     }
-    
+
     show_history() {
         this.$history.fadeIn()
     }

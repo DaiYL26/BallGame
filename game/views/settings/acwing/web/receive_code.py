@@ -16,37 +16,53 @@ def receive_code(request):
         return redirect('index')
 
     cache.delete(state)
-    appid = '122'
-    secret = '0e278a90e2234c9a843b36b8f487020f'
+    appid = '455860f7d44df945e738'
+    secret = '55ab8b64c9c20db24ddf782295145f9fdfb12b6f'
     
-    url = 'https://www.acwing.com/third_party/api/oauth2/access_token/'
+    url = 'https://github.com/login/oauth/access_token'
     params = {
-        'appid' : appid,
-        'secret' : secret,
+        'client_id' : appid,
+        'client_secret' : secret,
         'code' : code
     }
 
-    access_token_res = requests.get(url=url, params=params).json()
-    access_token = access_token_res['access_token']
-    openid = access_token_res['openid']
+    headers = {
+        'Accept' : 'application/json',
+    }
 
-    if not access_token or not openid:
+    access_token_res = requests.post(url=url, params=params, headers=headers).json()
+    print(access_token_res)
+    access_token = access_token_res['access_token']
+    # openid = access_token_res['openid']
+    # if not access_token or not openid:
+    #     return redirect('index')
+    if not access_token:
+        return redirect('index')
+
+    # players = Player.objects.filter(openid=openid)
+    # if players.exists():
+    #     login(request=request, user=players[0].user)
+    #     return redirect('index')
+    
+    get_userinfo_url = "https://api.github.com/user"
+    u_headers = {
+        'Authorization' : f'token {access_token}'
+    }
+
+    userinfo_res = requests.get(url=get_userinfo_url, headers=u_headers).json()
+    print(userinfo_res)
+
+    username = userinfo_res['login']
+    photo = userinfo_res['avatar_url']
+    openid = userinfo_res['id']
+
+    if not openid:
         return redirect('index')
 
     players = Player.objects.filter(openid=openid)
     if players.exists():
         login(request=request, user=players[0].user)
         return redirect('index')
-    
-    get_userinfo_url = "https://www.acwing.com/third_party/api/meta/identity/getinfo/"
-    params = {
-        'access_token' : access_token,
-        'openid' : openid
-    }
-
-    userinfo_res = requests.get(url=get_userinfo_url, params=params).json()
-    username = userinfo_res['username']
-    photo = userinfo_res['photo']
 
     while User.objects.filter(username=username).exists():
         username += str(randint(0, 9))

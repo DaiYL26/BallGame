@@ -13,17 +13,17 @@ def get_state_code():
 
 
 def apply_code(request):
-    appid = "122"
+    appid = "455860f7d44df945e738"
 
-    redirect_uri = quote('https://app122.acapp.acwing.com.cn/settings/acwing/web/receive_code/')
-    scope = 'userinfo'
+    redirect_uri = quote('http://120.77.222.189/settings/acwing/web/receive_code/')
+    scope = ''
     state = get_state_code()
 
     cache.set(state, True, 7200)
 
-    apply_code_url = 'https://www.acwing.com/third_party/api/oauth2/web/authorize/'
+    apply_code_url = 'https://github.com/login/oauth/authorize'
     return JsonResponse({
         'result' : 'success',
         'apply_code_url' : apply_code_url +\
-             "?appid=%s&redirect_uri=%s&scope=%s&state=%s" % (appid, redirect_uri, scope, state)
+             "?client_id=%s&redirect_uri=%s&scope=%s&state=%s" % (appid, redirect_uri, scope, state)
     })

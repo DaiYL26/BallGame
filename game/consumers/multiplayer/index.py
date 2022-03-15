@@ -11,18 +11,24 @@ from game.models.player.player import Player
 from channels.db import database_sync_to_async
 
 import json
-import threading, multiprocessing
 
 cnt = 0
 
 class MultiPlayer(AsyncWebsocketConsumer):
 
+    __player_data = None
+
     async def connect(self):
+        print(self.__player_data)
         await self.accept()
 
     
     async def disconnect(self, close_code):
         print('disconnect')
+        if self.__player_data:
+            self.__player_data['uuid'] = '-999'
+            await self.create_player(self.__player_data)
+        
         try:
             if self.room_name:
                 await self.channel_layer.group_discard(self.room_name, self.channel_name)
@@ -37,6 +43,9 @@ class MultiPlayer(AsyncWebsocketConsumer):
 
 
     async def create_player(self, data):
+        if not self.__player_data:
+            self.__player_data = data
+        print(data)
         self.room_name = None
         self.uuid = data['uuid']
         # Make socket

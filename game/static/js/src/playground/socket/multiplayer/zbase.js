@@ -2,7 +2,7 @@ class MultiPlayerSocket {
     constructor(playground, uuid) {
         this.playground = playground
         this.uuid = uuid
-        this.ws = new WebSocket("wss://app122.acapp.acwing.com.cn/wss/multiplayer/")
+        this.ws = new WebSocket("ws://120.77.222.189/wss/multiplayer/")
         this.start()
     }
 
@@ -15,12 +15,20 @@ class MultiPlayerSocket {
         this.on_receive()
     }
 
+    on_close() {
+        let outer = this
+        console.log('on close')
+        this.ws.onclose = function () {
+            outer.send_create_player(-999, outer.playground.root.settings.username, outer.playground.root.settings.photo)
+        }
+    }
+
     on_open() {
         let outer = this
         console.log(this.uuid, outer.uuid);
         this.ws.onopen = function () {
-            outer.send_create_player(outer.uuid, outer.playground.root.settings.username, outer.playground.root.settings.photo)    
-        }        
+            outer.send_create_player(outer.uuid, outer.playground.root.settings.username, outer.playground.root.settings.photo)
+        }
     }
 
     on_receive() {
@@ -31,7 +39,7 @@ class MultiPlayerSocket {
 
             if (uuid === outer.uuid)
                 return false
-            
+
             let event = data.event
             console.log(data);
             if (event === 'create_player') {
@@ -80,7 +88,7 @@ class MultiPlayerSocket {
             'x': x,
             'y': y,
             'damage': damage,
-            'type' : type
+            'type': type
         }))
     }
 
@@ -117,7 +125,7 @@ class MultiPlayerSocket {
             'event': 'message',
             'uuid': outer.uuid,
             'username': username,
-            'text' : text
+            'text': text
         }))
     }
 
@@ -156,7 +164,7 @@ class MultiPlayerSocket {
             'angle': angle,
             'damage': damage,
             'ball_uuid': ball_uuid,
-            'type' : type
+            'type': type
         }))
     }
 
@@ -177,7 +185,7 @@ class MultiPlayerSocket {
             'tx': tx,
             'ty': ty,
             'ball_uuid': ball_uuid,
-            'type' : type
+            'type': type
         }))
     }
 
@@ -203,7 +211,7 @@ class MultiPlayerSocket {
             'event': 'move_to',
             'uuid': uuid,
             'tx': tx,
-            'ty' : ty
+            'ty': ty
         }))
     }
 
