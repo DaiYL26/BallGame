@@ -24,9 +24,9 @@
 
 ![单人模式](./readme_pics/single.png)
 
-![](./readme_pics/multi.png)
+![多人联机对战](./readme_pics/multi.png)
 
 ![登陆](./readme_pics/login.png)
 
-![](./readme_pics/personal_info.png)
+![修改信息](./readme_pics/personal_info.png)
 
