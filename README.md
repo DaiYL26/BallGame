@@ -19,3 +19,14 @@
 运行 match_system/match/server.py
 
 最好用nginx代理一下，推荐使用python虚拟环境，如果跑不起来有些配置需要在settings.py里改
+
+
+
+![单人模式](./readme_pics/single.png)
+
+![](./readme_pics/multi.png)
+
+![登陆](./readme_pics/login.png)
+
+![](./readme_pics/personal_info.png)
+
