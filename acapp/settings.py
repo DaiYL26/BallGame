@@ -25,15 +25,15 @@ SECRET_KEY = 'django-insecure-_=i6r4ke_*zsl4afuqk-#8lzzw$wfr0$8ck10_#p2t5fvcp6yx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["120.77.222.189", "localhost", "app122.acapp.acwing.com.cn"]
+ALLOWED_HOSTS = ["#allow host", "localhost", "app122.acapp.acwing.com.cn"]
 
 CACHES = { 
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://120.77.222.189:63799/1',
+        'LOCATION': '#your redis host',
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": "moonlight",
+            "PASSWORD": "# redis password",
         },  
     },  
 }
@@ -44,7 +44,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis://:moonlight@120.77.222.189:63799/1")],
+            "hosts": [("redis://:redis host")],
             "capacity": 1500,
             "expiry": 10,
         },
